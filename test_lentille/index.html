@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF8" />
+        <title>Lentille</title>
+
+        <link href="index.css" rel="stylesheet" type="text/css" />
+        <script src="js-image-zoom.js" type="application/javascript"></script>
+        <script src="html2canvas.min.js" type="application/javascript"></script>
+    </head>
+    <body>
+        <div class="img-container-container" id="container-container">
+            <div id="container1" class="img-container" style="width: 400px">
+                <img
+                    id="myimage"
+                    src="https://assets.architecturaldesigns.com/plan_assets/324992268/large/23703JD_01_1553616680.jpg?1553616681"
+                    height="240"
+                />
+                <div id="myresult" class="img-zoom-result"></div>
+            </div>
+
+            <div id="container2" class="img-container" style="width: 400px">
+                <img
+                    id="myimage2"
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"
+                    height="240"
+                />
+                <div id="myresult2" class="img-zoom-result"></div>
+            </div>
+
+            <div id="table" class="features-table"></div>
+            <table
+                cellspacing="0"
+                rules="all"
+                border="1"
+                id="Table1"
+                style="border-collapse: collapse"
+                flex-flow="1"
+            >
+                <tr>
+                    <td>Présence</td>
+                    <td>Absence</td>
+                    <td>Feature</td>
+                    <td>Observation</td>
+                </tr>
+
+                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><input type="checkbox" /></td>
+                    <td>Yeux</td>
+                    <td><input type="text" /></td>
+                </tr>
+            </table>
+        </div>
+        <script src="index.js" type="application/javascript"></script>
+
+        <script></script>
+    </body>
+</html>
