@@ -13,3 +13,9 @@
 Les fonctions qui sont impliquées dans le zoom sont seulement : 
 
 panImageAsync - lensFollowUp - zoomWheelOnResult
+
+## TODO :
+
+- Ajouter requirement.txt 
+- Ajouter le table des features (feature - presence - ressemblance - notes)
+- Zoom et Panning sur image lentille
