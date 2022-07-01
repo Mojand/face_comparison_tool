@@ -221,16 +221,18 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
         try:
 
             #Named temporary file, will be deleted at the end of the with block
-            with tempfile.NamedTemporaryFile(mode = "wb",suffix = ".jpg",delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode = "w+b",suffix = ".jpg",delete=False) as f:
                 f.write(base64.b64decode(b64))
+                f.flush()
                 img = imread(f.name)
                 path=f.name
-            
 
-            # with open("src/temp_img.jpg",'wb') as f:
-            #     f.write(base64.b64decode(b64))
-            #     img = imread(f.name)
-            #     path=f.name
+            #FIXME!!!!!!!: if the image is less than 4 kB, it will not be read 
+            # So we double write the image to make it at least 4 kB (assuming it's at least 2 kB)            
+
+            # FIXED: if the image is less than 4 kB, the system won't bother to write it (4096 bytes mini)
+            # When the file is closed, it is automatically flushed but it is too late because img is already set from an empty file
+            # So we flush it before reading it 
 
         except Exception as e:
             return "invalid b64 ", e, 400
