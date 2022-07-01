@@ -12,6 +12,4 @@
 
 Les fonctions qui sont impliquées dans le zoom sont seulement : 
 
-panImageAsync
-lensFollowUp
-zoomWheelOnResult
+panImageAsync - lensFollowUp - zoomWheelOnResult
