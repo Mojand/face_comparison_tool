@@ -606,10 +606,10 @@ function panImageAsync(imgID, resultID, imgID2, resultID2){
   var offsetZoomX2 = 0 ;
   var offsetZoomY = 0 ;
   var offsetZoomY2 = 0 ;
-  var posResultX = 0;
-  var posResultY = 0;
-  var posResultX2 = 0;
-  var posResultY2 = 0;
+  var posResultX = 0 ;
+  var posResultY = 0 ;
+  var posResultX2 = 0 ;
+  var posResultY2 = 0 ;
 
   // Lens creation and set up
   lens = document.createElement("DIV");
@@ -664,14 +664,14 @@ function panImageAsync(imgID, resultID, imgID2, resultID2){
 
   // Same for the 2nd image
   var clicking2 = false;
-  var currentX2 = img2.naturalWidth/2 - result2.offsetWidth/2;
-  var currentY2 = img2.naturalHeight/2 - result2.offsetHeight/2;
+  var currentX2 = img2.naturalWidth/2 ;
+  var currentY2 = img2.naturalHeight/2;
   result2.param["posResultX"] = currentX2;
   result2.param["posResultY"] = currentY2;
   var previousX2;
   var previousY2;
   $("#"+resultID2).css('backgroundImage', "url('" + img2.src + "')");
-  $("#"+resultID2).css('background-position', `-${currentX2}px -${currentY2}px`);
+  $("#"+resultID2).css('background-position', `-${currentX2- result2.offsetWidth/2}px -${currentY2- result2.offsetHeight/2}px`);
 
   lensFollowUp(result)
   lensFollowUp(result2)
@@ -752,27 +752,27 @@ function panImageAsync(imgID, resultID, imgID2, resultID2){
       currentX2 = currentX2 + (previousX2 - e.offsetX);
       currentY2 = currentY2 + (previousY2 - e.offsetY);
 
-      if (currentX2 - this.param["offsetZoomX"] < 0){
-        currentX2 = this.param["offsetZoomX"];
+      if (currentX2 - this.param["offsetZoomX"] < result2.offsetWidth/2){
+        currentX2 = this.param["offsetZoomX"] + result2.offsetWidth/2;
       }
-      if (currentY2 - this.param["offsetZoomY"] < 0){
-        currentY2 = this.param["offsetZoomY"];
+      if (currentY2 - this.param["offsetZoomY"] < result2.offsetHeight/2){
+        currentY2 = this.param["offsetZoomY"] + result2.offsetHeight/2;
       }
-      if (currentX2 + this.offsetWidth/(this.param["lens"].scale) + 2*this.param["offsetZoomX"] > this.param["img"].naturalWidth - 1){
-        currentX2 = this.param["img"].naturalWidth - this.offsetWidth/(this.param["lens"].scale) - 2*this.param["offsetZoomX"] - 1 ;
+      if (currentX2 + this.offsetWidth/(this.param["lens"].scale) + 2*this.param["offsetZoomX"] > this.param["img"].naturalWidth - 1 + result2.offsetWidth/2){
+        currentX2 = this.param["img"].naturalWidth - this.offsetWidth/(this.param["lens"].scale) - 2*this.param["offsetZoomX"] - 1 + result2.offsetWidth/2;
       }
-      if (currentY2 + this.offsetHeight/(this.param["lens"].scale) + 2*this.param["offsetZoomY"] > this.param["img"].naturalHeight - 1){
-        currentY2 = this.param["img"].naturalHeight - this.offsetHeight/(this.param["lens"].scale) - 2*this.param["offsetZoomY"] - 1 ;
+      if (currentY2 + this.offsetHeight/(this.param["lens"].scale) + 2*this.param["offsetZoomY"] > this.param["img"].naturalHeight - 1 + result2.offsetWidth/2){
+        currentY2 = this.param["img"].naturalHeight - this.offsetHeight/(this.param["lens"].scale) - 2*this.param["offsetZoomY"] - 1 + result2.offsetWidth/2;
       }
 
-      $("#"+resultID2).css('background-position', `${- e.target.param["posResultX"] + this.param["offsetZoomX"]}px ${- e.target.param["posResultY"]  + this.param["offsetZoomY"]}px`);
+      $("#"+resultID2).css('background-position', `${- e.target.param["posResultX"] + this.param["offsetZoomX"] + result2.offsetWidth/2}px ${- e.target.param["posResultY"]  + this.param["offsetZoomY"] + result2.offsetHeight/2}px`);
       previousX2 = e.offsetX;
       previousY2 = e.offsetY;
 
       e.target.param["posResultX"] = currentX2;
       e.target.param["posResultY"] = currentY2;
 
-      console.log(e.target.param["posResultX"]+ this.offsetWidth/2)
+      console.log(currentX2,currentY2)
 
       lensFollowUp(e.target)
 
@@ -833,8 +833,8 @@ function zoomWheelOnResult(e){
     var scaledPosY = e.target.param["posResultY"]*scale
 
     // Update the offset on the lens and the image
-    e.target.param["offsetZoomX"] =  (img.naturalWidth - (img.naturalWidth/scale))/2
-    e.target.param["offsetZoomY"] =  (img.naturalHeight - (img.naturalHeight/scale))/2
+    // e.target.param["offsetZoomX"] =  (img.naturalWidth - (img.naturalWidth/scale))/2
+    // e.target.param["offsetZoomY"] =  (img.naturalHeight - (img.naturalHeight/scale))/2
 
     // e.target.param["offsetZoomX"] = 0
     // e.target.param["offsetZoomY"] = 0
@@ -845,23 +845,23 @@ function zoomWheelOnResult(e){
     //e.target.param["posResultX"] += (e.target.param["posResultX"] + this.offsetWidth/this.param["lens"].scale) - (img.naturalWidth/2)
 
 
-    if (e.target.param["posResultX"] - e.target.param["offsetZoomX"] < 0){
-      e.target.param["posResultX"] = this.param["offsetZoomX"];
-    }
+    // if (e.target.param["posResultX"] - e.target.param["offsetZoomX"] < 0){
+    //   e.target.param["posResultX"] = this.param["offsetZoomX"];
+    // }
 
-    if (e.target.param["posResultY"] - e.target.param["offsetZoomY"] < 0){
-      e.target.param["posResultY"] = this.param["offsetZoomY"];
-    }
+    // if (e.target.param["posResultY"] - e.target.param["offsetZoomY"] < 0){
+    //   e.target.param["posResultY"] = this.param["offsetZoomY"];
+    // }
 
-    if (e.target.param["posResultX"] + this.offsetWidth/(this.param["lens"].scale) + 2*this.param["offsetZoomX"] > this.param["img"].naturalWidth - 1){
-      e.target.param["posResultX"] = this.param["img"].naturalWidth - this.offsetWidth/(this.param["lens"].scale) - 2*this.param["offsetZoomX"] - 1 ;
-    }
+    // if (e.target.param["posResultX"] + this.offsetWidth/(this.param["lens"].scale) + 2*this.param["offsetZoomX"] > this.param["img"].naturalWidth - 1){
+    //   e.target.param["posResultX"] = this.param["img"].naturalWidth - this.offsetWidth/(this.param["lens"].scale) - 2*this.param["offsetZoomX"] - 1 ;
+    // }
 
-    if (e.target.param["posResultY"] + this.offsetHeight/(this.param["lens"].scale) + 2*this.param["offsetZoomY"] > this.param["img"].naturalHeight - 1){
-      e.target.param["posResultY"] = this.param["img"].naturalHeight - this.offsetHeight/(this.param["lens"].scale) - 2*this.param["offsetZoomY"] - 1 ;
-    }
+    // if (e.target.param["posResultY"] + this.offsetHeight/(this.param["lens"].scale) + 2*this.param["offsetZoomY"] > this.param["img"].naturalHeight - 1){
+    //   e.target.param["posResultY"] = this.param["img"].naturalHeight - this.offsetHeight/(this.param["lens"].scale) - 2*this.param["offsetZoomY"] - 1 ;
+    // }
      
-    e.target.style.backgroundPosition = `${-scaledPosX + e.target.param["offsetZoomX"]}px ${-scaledPosY + e.target.param["offsetZoomY"]}px`
+    e.target.style.backgroundPosition = `${-scaledPosX + e.target.param["offsetZoomX"]- this.offsetWidth/2}px ${-scaledPosY + e.target.param["offsetZoomY"]- this.offsetWidth/2}px`
 
     lensFollowUp(e.target)
 
