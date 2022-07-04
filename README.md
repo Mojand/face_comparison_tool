@@ -8,7 +8,7 @@
 ## Tester la lentille : 
 
 - Fichier HTML : templates/static/lentille/test.html
-- Fichier JS : templates/static//lentille/lentille.js
+- Fichier JS : templates/static/lentille/lentille.js
 
 Les fonctions qui sont impliquées dans le zoom sont seulement : 
 
@@ -17,7 +17,7 @@ panImageAsync - lensFollowUp - zoomWheelOnResult
 ## Tester la lentille version canvas : 
 
 - Fichier HTML : templates/static/lentille/canvas.html
-- Fichier JS : templates/static//lentille/canvas.js
+- Fichier JS : templates/static/lentille/canvas.js
 
 ## TODO :
 
