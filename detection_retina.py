@@ -126,6 +126,7 @@ def retinaface_extraction_1st_face(path = "src/img2.jpeg"):
     imageFromArray.save(buffered,format="JPEG")
     base64Img = base64.b64encode(buffered.getvalue())
 
+    if exists(path): os.remove(path)
     return base64Img.decode("ascii")
 
 # Detection of 1 face features in an image using DeepFace.analyze to get face coordinates and then crop the face, returns b64 image
@@ -156,6 +157,7 @@ def deepface_analyze_single(path="", b64 = "", ratio = 1.6, rmbg = False):
             #Named temporary file, will be deleted at the end of the with block
             with tempfile.NamedTemporaryFile(mode = "wb",suffix = "jpg",delete=False) as f:
                 f.write(base64.b64decode(b64))
+                f.flush()
                 img = imread(f.name)
                 path=f.name
             
@@ -192,6 +194,7 @@ def deepface_analyze_single(path="", b64 = "", ratio = 1.6, rmbg = False):
     imageFromArray.save(buffered,format="PNG")
     base64Img = base64.b64encode(buffered.getvalue())
 
+    if exists(path): os.remove(path)
     return base64Img.decode("ascii")
 
 # Detection of multiple faces features in an image using RetinaFace.detect_faces and then crop and rotate the faces, returns array b64 images
@@ -226,6 +229,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
                 f.flush()
                 img = imread(f.name)
                 path=f.name
+            
 
             #FIXME!!!!!!!: if the image is less than 4 kB, it will not be read 
             # So we double write the image to make it at least 4 kB (assuming it's at least 2 kB)            
@@ -246,6 +250,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
     if type(data) != dict:
 
         faces.append(b64)
+        if exists(path): os.remove(path)
         return faces
 
     else :
@@ -254,7 +259,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
             # Coordinates of both of the eyes
             xl,yl,xr,yr = j['landmarks']['left_eye'][0],j['landmarks']['left_eye'][1],j['landmarks']['right_eye'][0],j['landmarks']['right_eye'][1]
             # # Calculation of the tilt angle of the face
-            theta = rotateEyes(img,xl,yl,xr,yr)
+
 
             # Coordinates of the face box in its whole
             xt,yt,xb,yb = j['facial_area'][0],j['facial_area'][1],j['facial_area'][2],j['facial_area'][3]
@@ -270,7 +275,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
             base64Img = base64.b64encode(buffered.getvalue())
             # Append the current face to the list of faces
             faces.append(base64Img.decode("ascii"))
-
+        if exists(path): os.remove(path)
         return faces
 
 def retinaface_detect_faces_multiple_data_or_file(imgDataOrFile = "", ratio = 1.6):
@@ -309,8 +314,11 @@ def detection_faces(path="", b64=""):
             #Named temporary file, will be deleted at the end of the with block
             with tempfile.NamedTemporaryFile(mode = "wb",suffix = "jpg",delete=False) as f:
                 f.write(base64.b64decode(b64))
+                f.flush()
                 img = imread(f.name)
                 path=f.name
+                
+                
 
         except Exception as e:
             print (e)
@@ -330,7 +338,8 @@ def detection_faces(path="", b64=""):
         if type(data) != dict:
 
             return {'face_1' : {'score': 0}}
-    
+
+    if exists(path): os.remove(path)
     return data
 
 def detection_faces_data_or_file(imgDataOrFile = ""):

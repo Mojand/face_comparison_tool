@@ -11,6 +11,8 @@ var buttons = document.getElementsByName("button_type");
 
 var displayField = document.getElementById("responseDisplay");
 
+var btnResetFile = document.getElementById("resetFileBtn");
+
 /* ##################################################################################################################*/
 // event listener drag and drop
 
@@ -67,7 +69,7 @@ document
     });
   });
 
-// PyFeat - drag & drop
+// 
 document
   .querySelectorAll(".drop-zone__input[name=fileComp1]")
   .forEach((inputElement) => {
@@ -286,6 +288,16 @@ function updateThumbnail(dropZoneElement, file) {
   thumbnailElement.dataset.label = file.name;
 }
 
+function resetThummbnail(dropZoneElementId, filesID){
+  //Clear fileNameGUI element
+  document.getElementById(filesID).value = null;
+  var dropZoneElement = document.getElementById(dropZoneElementId);
+  var thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
+  thumbnailElement.classList.remove("drop-zone__thumb")
+  thumbnailElement.innerHTML = "<span class='drop-zone__prompt'>Drop file here or click to upload</span>";  
+  thumbnailElement.dataset.label = "";
+}
+
 for (var i = 0; i < radios.length; i++) {
   radios[i].onchange = function () {
 
@@ -338,6 +350,8 @@ function readBlob(){
     filename = file.name;
   }
 
+  resetThummbnail("Modification_dz1","fileNameGUIModif");
+
   //Object aimed to read files
   var reader = new FileReader();
 
@@ -379,6 +393,8 @@ function readBlob(){
   };
 
   reader.readAsArrayBuffer(blob);
+  
+
 }
 
 function readBlob2(){
@@ -438,6 +454,10 @@ function readBlob2(){
     filename2 = file2.name;
   }
 
+
+  resetThummbnail("Comparison_dz1","fileNameGUIComp1");
+  resetThummbnail("Comparison_dz2","fileNameGUIComp2");
+  
   //Object aimed to read files
   var reader = new FileReader();
   var reader2 = new FileReader();
@@ -526,6 +546,8 @@ window.addEventListener("DOMContentLoaded", function(){
     $("#formComparison").removeClass("display-none display-inline")
     $("#formComparison").addClass("display-inline")
   }
+
+
 });
 
 
@@ -609,7 +631,7 @@ function imageModification(img) {
   left.appendChild(rangeContr);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // //Button try
+  // //Button version of the contrast slider
   // let btnContrPlus = document.createElement("button")
   // let btnContrMoins = document.createElement("button")
   // btnContrPlus.id = "btnContrPlus" + numberImgs;
@@ -752,8 +774,67 @@ function reset(){
   resetBtn.addEventListener("click", reset);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Reset zoom button set up
+// Undo-Redo div set up
 
+let unDoreDoDiv = document.createElement("div");
+unDoreDoDiv.id = "unDoreDoDiv"+numberImgs;
+unDoreDoDiv.className = "unDoreDoDiv";
+unDoreDoDiv.style.display = "flex"
+left.appendChild(unDoreDoDiv);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Undo button set up
+
+
+let undoBtn = document.createElement("button");
+undoBtn.id = "undo"+numberImgs;
+undoBtn.innerText = "Undo"
+undoBtn.className="btnUi";
+undoBtn.style.flex = "1"
+unDoreDoDiv.appendChild(undoBtn)
+
+right.images = [];
+let currentUndoPosition = -1;
+
+function undo(){
+  if(currentUndoPosition > 0){
+    currentUndoPosition--;
+    console.log(right.images,currentUndoPosition)
+    // CHANGER IMAGE + CURSEURS
+  }
+}
+
+  undoBtn.addEventListener("click", undo);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Redo button set up
+
+  let redoBtn = document.createElement("button");
+  redoBtn.id = "redo"+numberImgs;
+  redoBtn.innerText = "Redo"
+  redoBtn.className="btnUi";
+  redoBtn.style.flex = "1"
+  unDoreDoDiv.appendChild(redoBtn)
+
+  function redo(){
+    if (currentUndoPosition < right.images.length - 1 ){
+      currentUndoPosition++;
+      
+      console.log(right.images,currentUndoPosition)
+
+      canvas.width = image_.width;
+      canvas.height = image_.height;
+      image_.src = right.images[currentUndoPosition][0];
+      ctx.drawImage(image_, 0, 0, image_.width, image_.height);
+
+
+    }
+    else{
+      console.log(currentUndoPosition, right.images.length, "not possible")
+    }
+  }
+
+  redoBtn.addEventListener("click", redo);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Filter function called on every range input  
@@ -774,7 +855,43 @@ function filter() {
       this.revert(false);
       this.brightness(brightValue).saturation(satValue).exposure(expoValue).sharpen(sharpValue).contrast(contrastValue).render();
     });
+
+
+    if (currentUndoPosition == right.images.length){
+      if (right.images.length < 5)
+      {    
+        right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
+        if (currentUndoPosition < 4) currentUndoPosition += 1;
+      }
+      else
+      {
+        right.images.shift();
+        right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
+      }
+    }
+    else{
+      console.log("oui")
+      right.images.splice(currentUndoPosition)
+      if (right.images.length < 5)
+      {    
+        right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
+        if (currentUndoPosition < 4) currentUndoPosition += 1;
+      }
+      else
+      {
+        right.images.shift();
+        right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
+      }
+    }
+
+    console.log(right.images,currentUndoPosition);
+
 }
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 right.appendChild(canvas);
 
@@ -792,6 +909,7 @@ document.querySelectorAll('input[type="range"]')[numberImgs*5+3].onchange = filt
 document.querySelectorAll('input[type="range"]')[numberImgs*5+4].onchange = filter
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 }
 
 function imageComparison(img1, img2){
@@ -888,8 +1006,6 @@ function imageComparison(img1, img2){
   cel2.appendChild(myresultdiv2);
   myresultdiv2.appendChild(myimage2);
 
-
-
   set.appendChild(table)
 
   displayField.appendChild(set)
@@ -898,6 +1014,115 @@ function imageComparison(img1, img2){
     createUi("myimage1","myresult1", "myimage2", "myresult2", "setId2")
   });
 }
+
+function imageComparisonCanvas(img1, img2){
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //Result elements set up
+  
+    if(document.getElementById("setId2") != null){
+      document.getElementById("setId2").remove();
+    }
+  
+    //Containing both images
+  
+    let set = document.createElement("div");
+    set.className = "setClass2";
+    set.id = "setId2";
+    set.classList.add("display-flex");
+  
+    let h1 = document.createElement("h1");
+    h1.innerText = "Face Comparison";
+    h1.className = "h1ComparisonClass";
+  
+    const delBtn = document.createElement("button");
+    h1.appendChild(delBtn);
+    delBtn.style.position = "relative";
+    delBtn.style.top = "-51%";
+    delBtn.style.left = "41.6%";
+    delBtn.innerText="✕"
+  
+    delBtn.addEventListener("click", function(){
+      document.getElementById("setId2").remove();
+    });
+  
+    set.insertBefore(h1, set.firstChild);
+  
+    var h = window.outerHeight;
+    var w = window.outerWidth;
+  
+    var table=document.createElement("table");
+    table.id = "tableId";
+    table.className = "tableComp ";
+    table.style.width="100%"
+    row=table.insertRow(0)
+  
+    cel=row.insertCell(0)
+    cel.style.maxWidth="45%"
+    cel.style.maxHeight="45%"
+    cel.style.width="45%"
+    cel.style.height="45%"
+    let myresult1 = document.createElement("div");
+    myresult1.id = "myresult1";
+    myresult1.className = "img-zoom-result-class";
+    let mycanvas1 = document.createElement("canvas");
+    mycanvas1.id = "mycanvas1";
+    myresult1.appendChild(mycanvas1);
+    cel.appendChild(myresult1)
+  
+    cel=row.insertCell(1)
+    cel.style.maxWidth="45%"
+    cel.style.maxHeight="45%"
+    cel.style.width="45%"
+    cel.style.height="45%"
+    let myresult2 = document.createElement("div");
+    myresult2.id = "myresult2";
+    myresult2.className = "img-zoom-result-class";
+    let mycanvas2 = document.createElement("canvas");
+    mycanvas2.id = "mycanvas2";
+    myresult2.appendChild(mycanvas2);
+    cel.appendChild(myresult2)
+  
+    
+  
+    row=table.insertRow(1)
+  
+    cel=row.insertCell(0)
+    cel.style.maxWidth=((w/2)-15)+"px"
+    cel.style.maxHeight=((h/2)-15)+"px"
+    cel.style.width=((w/2)-15)+"px"
+    cel.style.height=((h/2)-15)+"px"
+    let myresultdiv1 = document.createElement("div");
+    myresultdiv1.className = "img-container"
+    let myimage1 = document.createElement("img");
+    myimage1.id = "myimage1";
+    myimage1.src = "data:image/jpg;base64, " + img1;
+    myimage1.className = "myimage1Class";
+    cel.appendChild(myresultdiv1);
+    myresultdiv1.appendChild(myimage1)
+  
+    cel2=row.insertCell(1)
+    cel2.style.maxWidth=((w/2)-15)+"px"
+    cel2.style.maxHeight=((h/2)-15)+"px"
+    cel2.style.width=((w/2)-15)+"px"
+    cel2.style.height=((h/2)-15)+"px"
+    let myresultdiv2 = document.createElement("div");
+    myresultdiv2.className = "img-container"
+    let myimage2 = document.createElement("img");
+    myimage2.id = "myimage2";
+    myimage2.src = "data:image/jpg;base64, " + img2;
+    myimage2.className = "myimage2Class";
+    cel2.appendChild(myresultdiv2);
+    myresultdiv2.appendChild(myimage2);
+  
+    set.appendChild(table)
+  
+    displayField.appendChild(set)
+  
+    $(document).ready(function(){
+      createUiCanvSwitch("myimage1","myresult1","mycanvas1","myimage2", "myresult2","mycanvas2" ,"setId2")
+    });
+  }
 
 function treatReturn(response) {
   repStr = response.target.response;
@@ -945,6 +1170,7 @@ function treatReturn(response) {
       imageModification(element);
     }
   }
+
 }
 
 function treatReturn2(response){
@@ -964,7 +1190,7 @@ function treatReturn2(response){
 
   // Check if there only one face detected in the images
   if (allFacesDetected1.length == 1 & allFacesDetected2.length == 1){
-    imageComparison(allFacesDetected1[0][0], allFacesDetected2[0][0])
+    imageComparisonCanvas(allFacesDetected1[0][0], allFacesDetected2[0][0])
   }
 
 
@@ -999,7 +1225,7 @@ function treatReturn2(response){
         displayField2.removeChild(set);
         chosen1 = e.target.element[0];
         if (chosen2 != null){
-          imageComparison(chosen1, chosen2)
+          imageComparisonCanvas(chosen1, chosen2)
         }
       });
     }
@@ -1036,7 +1262,7 @@ function treatReturn2(response){
           displayField2.removeChild(set2);
           chosen2 = e.target.element[0];
           if (chosen1 != null){
-            imageComparison(chosen1, chosen2)
+            imageComparisonCanvas(chosen1, chosen2)
           }
         });
       }
@@ -1046,4 +1272,5 @@ function treatReturn2(response){
   }
 
 }
+
 

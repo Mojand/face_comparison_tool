@@ -18,7 +18,11 @@ function addLineInTable(table,feature){
     tr.appendChild(tdAbsence);
 
     var tdComment = document.createElement("td");
-    tdComment.innerHTML = '<input type="text" id ="'+feature+'CommentId" class = "tickClass" >';
+    
+    //tdComment.innerHTML = '<input type="text" id ="'+feature+'CommentId" class = "tickClass" >';
+    
+    tdComment.innerHTML = '<textarea id="'+feature+'CommentId" rows="1" cols="33"></textarea>'
+    
     tdComment.className = "commentClass";
     tr.appendChild(tdComment);
 

@@ -21,10 +21,18 @@
   
   .img-zoom-lens {
     position: absolute;
-    border: 2px dotted #000000;
-    /*définissez la taille de la lentille:*/
+
     width: 100px;
     height: 100px;
+  }
+
+  [frozen = true].img-zoom-lens {
+    border: 2px dotted #7c7c7c;
+  }
+  
+  
+  [frozen = false].img-zoom-lens {
+    border: 2px solid #0945b9;
   }
   
   .img-zoom-result {
