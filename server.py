@@ -38,6 +38,9 @@ class STM(Resource):
         """
         if request.form["Modification"] == "True" :
 
+            #Start timer
+            start_time = time.time()
+
             # Take the url parameter from the request.from attribute only if there is one
             url = None
             if "url" in request.form:
@@ -93,7 +96,7 @@ class STM(Resource):
                 :return: array with base64 data all detected faces in the picture, returns the whole picture if no face is detected
                 """
                 frame64 = detection_retina.retinaface_detect_faces_multiple(
-                    path=url,ratio=zoom
+                    path=url,ratio=zoom, normalize=request.form["Normalize"]
                 )
 
             #If there is no url but file data -> process the file
@@ -104,19 +107,31 @@ class STM(Resource):
                 :param zoom: zoom factor of the picture
                 :return: array with base64 data all detected faces in the picture, returns the whole picture if no face is detected
                 """
+
                 frame64 = detection_retina.retinaface_detect_faces_multiple(
-                    b64=file,ratio=zoom
+                    b64=file,ratio=zoom, normalize=request.form["Normalize"]
                 )
 
+
             #Response in json format sending the base64 data of all detected faces
-            response = jsonify({"frameResponse64": frame64})
+            response = jsonify({"frameResponse64": frame64})    
             #Access control headers to allow cross-origin requests
             response.headers.add("Access-Control-Allow-Origin", "*")
 
+            #End and print timer
+            end = time.time()
+            print("Time: " + str(end - start_time))
+
+
+            
             return response
         
         # Case 2 : Comparison of two pictures
         if request.form["Comparison"] == "True" :
+
+            # Start timer
+            start = time.time()
+
 
             # Take the file data parameter from the request.from attribute only if there is one
             file = None
@@ -179,7 +194,7 @@ class STM(Resource):
                 :param imgDataOrFile: file data or url of the first picture
                 :return: dictionary with the facial key positions in the picture (facial area, eyes, nose, mouth)
                 """ 
-                feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face1)
+                feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face1[0])
                 
                 if feature['face_1']['score'] != 0 :
 
@@ -191,21 +206,8 @@ class STM(Resource):
                     feature['face_1']['landmarks']['mouth_left'] =  [float (x) for x in feature['face_1']['landmarks']['mouth_left']]
 
                     temp = feature['face_1']
-                featuresImg1.append((face1,temp))
+                featuresImg1.append((face1[0],temp, [float (x) for x in face1[1]]))
 
-            
-
-            # features1 = detection_retina.detection_faces_data_or_file(imgDataOrFile=faces1[0])
-                        
-            # #Convert key positions coordinates to float arrays
-            # if features1['face_1']['score'] != 0 :
-
-            #     features1['face_1']['facial_area'] =  [float (x) for x in features1['face_1']['facial_area']]
-            #     features1['face_1']['landmarks']['right_eye'] =  [float (x) for x in features1['face_1']['landmarks']['right_eye']]
-            #     features1['face_1']['landmarks']['left_eye'] =  [float (x) for x in features1['face_1']['landmarks']['left_eye']]
-            #     features1['face_1']['landmarks']['nose'] =  [float (x) for x in features1['face_1']['landmarks']['nose']]
-            #     features1['face_1']['landmarks']['mouth_right'] =  [float (x) for x in features1['face_1']['landmarks']['mouth_right']]
-            #     features1['face_1']['landmarks']['mouth_left'] =  [float (x) for x in features1['face_1']['landmarks']['mouth_left']]
 
             featuresImg2 = []
 
@@ -216,7 +218,7 @@ class STM(Resource):
                 :param imgDataOrFile: file data or url of the first picture
                 :return: dictionary with the facial key positions in the picture (facial area, eyes, nose, mouth)
                 """ 
-                feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face2)
+                feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face2[0])
                 
                 if feature['face_1']['score'] != 0 :
 
@@ -228,25 +230,17 @@ class STM(Resource):
                     feature['face_1']['landmarks']['mouth_left'] =  [float (x) for x in feature['face_1']['landmarks']['mouth_left']]
 
                     temp = feature['face_1']
-                featuresImg2.append((face2,temp))
-
-            # features2 = detection_retina.detection_faces_data_or_file(imgDataOrFile=faces2[0])
-        
-            # if features2['face_1']['score'] != 0 :
-
-            #     features2['face_1']['facial_area'] =  [float (x) for x in features2['face_1']['facial_area']]
-            #     features2['face_1']['landmarks']['right_eye'] =  [float (x) for x in features2['face_1']['landmarks']['right_eye']]
-            #     features2['face_1']['landmarks']['left_eye'] =  [float (x) for x in features2['face_1']['landmarks']['left_eye']]
-            #     features2['face_1']['landmarks']['nose'] =  [float (x) for x in features2['face_1']['landmarks']['nose']]
-            #     features2['face_1']['landmarks']['mouth_right'] =  [float (x) for x in features2['face_1']['landmarks']['mouth_right']]
-            #     features2['face_1']['landmarks']['mouth_left'] =  [float (x) for x in features2['face_1']['landmarks']['mouth_left']]
-    
+                featuresImg2.append((face2[0],temp,[float (x) for x in face2[1]]))
 
             #Response in json format sending the base64 data of all detected faces with the facial key positions
-            # response = jsonify({"features1": featuresImg2, "features2": features2, "face1": faces1[0], "face2": faces2[0]})
             response = jsonify({"features1": featuresImg1, "features2": featuresImg2})
             #Access control headers to allow cross-origin requests
             response.headers.add("Access-Control-Allow-Origin", "*")
+
+            #End and print timer
+            end = time.time()
+            print("Time: " + str(end - start))
+
 
             return response
         

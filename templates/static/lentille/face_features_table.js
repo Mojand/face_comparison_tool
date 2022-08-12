@@ -18,19 +18,44 @@ function addLineInTable(table,feature){
     tr.appendChild(tdAbsence);
 
     var tdComment = document.createElement("td");
-    
-    //tdComment.innerHTML = '<input type="text" id ="'+feature+'CommentId" class = "tickClass" >';
-    
-    tdComment.innerHTML = '<textarea id="'+feature+'CommentId" rows="1" cols="33"></textarea>'
-    
+    tdComment.innerHTML = '<textarea id="'+feature+'CommentId" rows="2" cols="20"></textarea>'
     tdComment.className = "commentClass";
     tr.appendChild(tdComment);
 
+    //Add a button to delete the line
+    var tdDelete = document.createElement("td");
+    const deleteButton = document.createElement("button");
+    deleteButton.innerHTML = "✕";
+    deleteButton.className = "delBtnClass";
+    deleteButton.classList.add("squareBtnClass");
+    deleteButton.onclick = function(){
+      tr.remove();
+    }
+    tdDelete.appendChild(deleteButton);
+    tr.appendChild(tdDelete);
+
     table.appendChild(tr);
+
+    $('textarea').each(function () {
+        this.setAttribute('style', 'height:' + 30 + 'px;overflow-y:hidden;');
+      }).on('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
 }
 
-var table = document.getElementById("Table1");
-addLineInTable(table,"Nose");
-addLineInTable(table,"Eyes");
-addLineInTable(table,"Mouth");
-addLineInTable(table,"Cheek");
+// var table = document.getElementById("Table1");
+// addLineInTable(table,"Nose");
+// addLineInTable(table,"Eyes");
+// addLineInTable(table,"Mouth");
+// addLineInTable(table,"Cheek");
+
+// var divTable = document.getElementById("table");
+// var slideBtn = document.createElement("button");
+// slideBtn.innerHTML = "►";
+// divTable.appendChild(slideBtn);
+
+// $(slideBtn).click(function(){
+//     $("#tableSolo").slideToggle(500);
+// });
+

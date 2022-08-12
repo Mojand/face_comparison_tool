@@ -1,9 +1,5 @@
-function sigmoid(z) {
-    return 1 / (1 + Math.exp(-z));
-}
-
-
 function panZoomCanvasAsync(imgID, resultID, canvasID, imgID2, result2ID, canvasID2){
+
 
     var canvas = document.getElementById(canvasID);
     var image = document.getElementById(imgID);
@@ -791,14 +787,18 @@ function panZoomCanvasSwitch(imgID, resultID, canvasID, imgID2, result2ID, canva
 
     function draw(){
 
-        canvas.height = result.offsetHeight;
-        canvas.width = result.offsetWidth;  
         
+        // canvas.height = result.offsetHeight;
+        // canvas.width = result.offsetWidth;  
+        
+        // Taking the size of the canvas size in account and the camera zoom
         posX = - cameraOffset.x*cameraZoom + canvas.width/2;
         posY = - cameraOffset.y*cameraZoom + canvas.height/2;
 
+
         ctx.drawImage(imgCanvas, posX, posY, image.naturalWidth*cameraZoom, image.naturalHeight*cameraZoom);
         
+        // Change position of the lens on the base image
         lens.style.width = (canvas.width*image.width)/(image.naturalWidth*cameraZoom) + "px";
         lens.style.height = (canvas.height*image.height)/(image.naturalHeight*cameraZoom) + "px";
 

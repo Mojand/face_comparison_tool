@@ -12,6 +12,7 @@
 			  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
 			  crossorigin="anonymous">
         </script>
+        <script src="csvExport.js"></script>
 
     </head>
     <body>
@@ -39,7 +40,8 @@
                 </div>
 
                 <div id="table" class="features-table"> 
-                    
+                
+                <div id="tableSolo">
                 <table
                     cellspacing="0"
                     rules="all"
@@ -51,23 +53,32 @@
                 >
                     <tr>
                         <td>Feature</td>
-                        <td>Ressemblence</td>
-                        <td>Difference</td>
+                        <td> + </td>
+                        <td> - </td>
                         <td>Comment</td>
                     </tr>
 
                 </table>
-                
-                <button>Hide/Show</button>
+            </div>
+    
             
             </div>
 
             </div>
         </div>
-        <script src="lentille.js" type="application/javascript"></script>
-        <script src="face_features_table.js" type="application/javascript"></script>
 
+        <script>
+            src =
+                "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"
+        </script>
+        
+
+    <!-- <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
 
         <script></script>
+
+        <script src="lentille.js" type="application/javascript"></script>
+        <script src="face_features_table.js" type="application/javascript"></script>
     </body>
 </html>

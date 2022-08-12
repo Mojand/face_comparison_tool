@@ -186,14 +186,14 @@ def brisqueScore(url):
 
 
 def scoreComparison(imgs):
-    scores = ()
+    scores = []
     bestscore = 101
     besturl = ''
 
     for url in imgs:
         score = brisqueScore(url)
 
-        scores = scores + (url, score)
+        scores.append([url, score])
         if score < bestscore:
             bestscore = score  
             besturl = url
@@ -232,6 +232,23 @@ def scoreComparisonShow(imgs):
 
 urls = ['src/neutral.jpeg','src/worse.jpeg','src/better.jpeg','src/sharpen.jpeg']
 scores = scoreComparison(urls)
-print(scores)
+# print(scores)
+# print(urls)
 
+
+#Show four images in a grid
+fig = plt.figure(figsize=(8,8))
+rows = int(math.sqrt(len(urls)))
+columns = rows
+i = 1
+for score in scores[0]:
+    img = cv2.imread(score[0])
+    img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)
+    fig.add_subplot(rows,columns,i)
+    #add title to each image
+    plt.title(score[0] + ' Score '+ str(round(score[1],2)))
+
+    plt.imshow(img)
+    i = i+1
+plt.show()
 

@@ -6,45 +6,51 @@ var Deepface_author1_data;
 var PyFeat_author1_data;
 
 var radios = document.getElementsByName("radios");
-
 var buttons = document.getElementsByName("button_type");
-
 var displayField = document.getElementById("responseDisplay");
+var displayField3 = document.getElementById("responseDisplay3");
 
 var btnResetFile = document.getElementById("resetFileBtn");
+
+var imageTotalModif = null;
+var imageTotalComp1 = null;
+var imageTotalComp2 = null;
 
 /* ##################################################################################################################*/
 // event listener drag and drop
 
-// Deepface - drag & drop
-// Search for
+// Drag and drop for image modification file
 document
+  // Get the drop zone element 
   .querySelectorAll(".drop-zone__input[name=fileModif]")
   .forEach((inputElement) => {
     const dropZoneElement = document.getElementById("Modification_dz1");
 
+    // Not using drag and drop but selecting file manually
     dropZoneElement.addEventListener("click", (e) => {
       inputElement.click();
     });
 
     inputElement.addEventListener("change", (e) => {
+      // If the file list in not empty
       if (inputElement.files.length) {
+        // Read the content of the file
         var reader = new FileReader();
         reader.readAsText(inputElement.files[0]);
-        // save dropped file as string in data variable
-        reader.onload = function () {
-          var text = reader.result;
-          Deepface_author1_data = text;
-        };
+        // Uptadate the thumbnail label and aspect
         updateThumbnail(dropZoneElement, inputElement.files[0]);
       }
     });
 
+
+
+    // Change the drop zone aspect when the user is dragging a file over it
     dropZoneElement.addEventListener("dragover", (e) => {
       e.preventDefault();
       dropZoneElement.classList.add("drop-zone--over");
     });
 
+    // If the user leaves the drop zone or cancels the drag action, remove the aspect
     ["dragleave", "dragend"].forEach((type) => {
       dropZoneElement.addEventListener(type, (e) => {
         dropZoneElement.classList.remove("drop-zone--over");
@@ -54,14 +60,9 @@ document
     dropZoneElement.addEventListener("drop", (e) => {
       e.preventDefault();
       if (e.dataTransfer.files.length) {
-        var current_file = e.dataTransfer.files[0];
         var reader = new FileReader();
         reader.readAsText(e.dataTransfer.files[0]);
         // save dropped file as string in data variable
-        reader.onload = function () {
-          var text = reader.result;
-          Deepface_author1_data = text;
-        };
         inputElement.files = e.dataTransfer.files;
         updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
       }
@@ -69,7 +70,7 @@ document
     });
   });
 
-// 
+
 document
   .querySelectorAll(".drop-zone__input[name=fileComp1]")
   .forEach((inputElement) => {
@@ -83,11 +84,6 @@ document
       if (inputElement.files.length) {
         var reader = new FileReader();
         reader.readAsText(inputElement.files[0]);
-        // save dropped file as string in data variable
-        reader.onload = function () {
-          var text = reader.result;
-          PyFeat_author1_data = text;
-        };
         updateThumbnail(dropZoneElement, inputElement.files[0]);
       }
     });
@@ -106,14 +102,8 @@ document
     dropZoneElement.addEventListener("drop", (e) => {
       e.preventDefault();
       if (e.dataTransfer.files.length) {
-        var current_file = e.dataTransfer.files[0];
         var reader = new FileReader();
         reader.readAsText(e.dataTransfer.files[0]);
-        // save dropped file as string in data variable
-        reader.onload = function () {
-          var text = reader.result;
-          PyFeat_author1_data = text;
-        };
         inputElement.files = e.dataTransfer.files;
         updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
       }
@@ -134,11 +124,6 @@ document
       if (inputElement.files.length) {
         var reader = new FileReader();
         reader.readAsText(inputElement.files[0]);
-        // save dropped file as string in data variable
-        reader.onload = function () {
-          var text = reader.result;
-          PyFeat_author1_data = text;
-        };
         updateThumbnail(dropZoneElement, inputElement.files[0]);
       }
     });
@@ -157,14 +142,8 @@ document
     dropZoneElement.addEventListener("drop", (e) => {
       e.preventDefault();
       if (e.dataTransfer.files.length) {
-        var current_file = e.dataTransfer.files[0];
         var reader = new FileReader();
         reader.readAsText(e.dataTransfer.files[0]);
-        // save dropped file as string in data variable
-        reader.onload = function () {
-          var text = reader.result;
-          PyFeat_author1_data = text;
-        };
         inputElement.files = e.dataTransfer.files;
         updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
       }
@@ -181,6 +160,8 @@ function getB64Str(buffer) {
   }
   return window.btoa(binary);
 }
+
+/*
 
 function downloadFile(content, fileName) {
   var encodedUri = encodeURI(content);
@@ -244,6 +225,7 @@ function returnInCSVs() {
   }
 }
 
+
 function b64toBlob(b64Data, contentType = "", sliceSize = 512) {
   const byteCharacters = atob(b64Data);
   const byteArrays = [];
@@ -263,6 +245,8 @@ function b64toBlob(b64Data, contentType = "", sliceSize = 512) {
   const blob = new Blob(byteArrays, { type: contentType });
   return blob;
 }
+
+*/
 
 /**
  * Updates the thumbnail on a drop zone element.
@@ -288,30 +272,41 @@ function updateThumbnail(dropZoneElement, file) {
   thumbnailElement.dataset.label = file.name;
 }
 
-function resetThummbnail(dropZoneElementId, filesID){
-  //Clear fileNameGUI element
+function resetThumbnail(dropZoneElementId, filesID){
+
+  //Clear fileNameGUI element and reset the file content
   document.getElementById(filesID).value = null;
   var dropZoneElement = document.getElementById(dropZoneElementId);
   var thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
+  
+  //Changes the aspect of the drop zone
   thumbnailElement.classList.remove("drop-zone__thumb")
+  // Removes the file name daplayed
   thumbnailElement.innerHTML = "<span class='drop-zone__prompt'>Drop file here or click to upload</span>";  
   thumbnailElement.dataset.label = "";
 }
+    
+
 
 for (var i = 0; i < radios.length; i++) {
   radios[i].onchange = function () {
+
+  // If the user changes the type of fonctionality, we need to hide the unnecessary elements
 
   $("#formModification").toggleClass("display-none display-inline"); 
   $("#formComparison").toggleClass("display-none display-inline"); 
   $(".setClass").toggleClass("display-none display-flex");
   $(".setClass2").toggleClass("display-none display-flex");
   $(".setShowcaseClass").toggleClass("display-none display-inline");
-
+  $("#responseDisplay3").toggleClass("display-none display-flex");
 
   };
 }
 
+
+// Reading files and responding to the server for he file modification case
 function readBlob(){
+
   let file = null;
   let filetype = "";
   let filename = "";
@@ -324,8 +319,6 @@ function readBlob(){
   //Get url from input i.e the absolute path of the file given by user
   fileUrl = document.getElementById("url").value;
 
-
-
   //Get zoom value
   let zoomElem = document.getElementById("zoom");
   let zoomElemValue = zoomElem.value;
@@ -336,6 +329,7 @@ function readBlob(){
     return;
   }
 
+  // If there is both a file and an URL
   if (files.length && fileUrl.length) {
     alert("Please select a single file or an URL !");
     return;
@@ -350,7 +344,10 @@ function readBlob(){
     filename = file.name;
   }
 
-  resetThummbnail("Modification_dz1","fileNameGUIModif");
+  let normalizeImage = document.getElementById("normalizeId").checked;
+
+  // Clear the drop zone input after reading the file
+  resetThumbnail("Modification_dz1","fileNameGUIModif");
 
   //Object aimed to read files
   var reader = new FileReader();
@@ -365,6 +362,7 @@ function readBlob(){
       var cont = evt.target.result;
       var base64String = getB64Str(cont);
 
+      // Form data containing all the info needed to the server
       let formData = new FormData();
 
       formData.append("contentType", filetype);
@@ -374,7 +372,9 @@ function readBlob(){
       formData.append("url", fileUrl);
       formData.append("Modification", "True");
       formData.append("Comparison", "False");
+      formData.append("Normalize", normalizeImage);
 
+      imageTotalModif = base64String;
 
       let xhr = new XMLHttpRequest();
       xhr.onload = function (data) {
@@ -394,9 +394,9 @@ function readBlob(){
 
   reader.readAsArrayBuffer(blob);
   
-
 }
 
+// Reading files and responding to the server for the file comparison case
 function readBlob2(){
 
   let file = null;
@@ -425,6 +425,7 @@ function readBlob2(){
 
   let nbFiles = 0;
 
+  // Increase nbFiles if there is a file
   if (!files.length){nbFiles = nbFiles + 1}
   if (!files2.length){nbFiles = nbFiles + 1}
   if (!fileUrl.length){nbFiles = nbFiles + 1}
@@ -455,8 +456,9 @@ function readBlob2(){
   }
 
 
-  resetThummbnail("Comparison_dz1","fileNameGUIComp1");
-  resetThummbnail("Comparison_dz2","fileNameGUIComp2");
+  // Reset both thumbnails
+  resetThumbnail("Comparison_dz1","fileNameGUIComp1");
+  resetThumbnail("Comparison_dz2","fileNameGUIComp2");
   
   //Object aimed to read files
   var reader = new FileReader();
@@ -492,6 +494,13 @@ function readBlob2(){
       formData.append("Comparison", "True")
       formData.append("Modification", "False")
 
+      // We document is ready
+
+      $(document).ready(function(){
+      imageTotalComp1 = base64String;
+      imageTotalComp2 = base64String2;
+      });
+
       let xhr = new XMLHttpRequest();
       xhr.onload = function (data) {
         // data is the response from the server, it refers to Timeline
@@ -517,18 +526,20 @@ for (var i = 0; i < buttons.length; i++) {
     var button = this.id;
 
     if (button == "button_deepface" && document.querySelector("#radio1").checked) {
-
       readBlob();
     }
 
     if (button == "button_deepface2" && document.querySelector("#radio2").checked){
-
       readBlob2();
     }
   };
 }
 
+// In case the user refreshes the page, considering the checks fonctionalities, display the right elements
 window.addEventListener("DOMContentLoaded", function(){
+
+
+
   if (document.querySelector("#radio1").checked){
 
     $("#formModification").removeClass("display-none display-inline")
@@ -536,7 +547,6 @@ window.addEventListener("DOMContentLoaded", function(){
 
     $("#formComparison").removeClass("display-none display-inline")
     $("#formComparison").addClass("display-none")
-
   }
 
   if (document.getElementById("radio2").checked){  
@@ -547,9 +557,7 @@ window.addEventListener("DOMContentLoaded", function(){
     $("#formComparison").addClass("display-inline")
   }
 
-
 });
-
 
 function imageModification(img) {
 
@@ -576,7 +584,7 @@ function imageModification(img) {
 
   //Containing the image
   let right = document.createElement("div")
-  //Containing 
+  //Containing cursos and buttons
   let left = document.createElement("div")
   
   right.className = "right-div"
@@ -587,6 +595,7 @@ function imageModification(img) {
 
   set.className = "setClass";
   set.classList.add("display-flex");
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
   //Canvas setting up
   let canvas = document.createElement("canvas");
@@ -740,17 +749,41 @@ function imageModification(img) {
   saveBtn.className="btnUi";
   left.appendChild(saveBtn)
   
+
+  // This methode uses save method of Caman to save the image as a file but doesn't take account of the redo/undo system 
+
+  // function save(){
+  //   Caman("#canvasId" + numberImgs, image_, function () {
+  //       this.render(function() {
+  //         this.save("jpeg");
+  //       });
+  //   });
+  // }
+
+  // Using html2canvas to save the content of the canvas
   function save(){
-    Caman("#canvasId" + numberImgs, image_, function () {
-        this.render(function() {
-          this.save("jpeg");
-        });
+    html2canvas(canvas,{ letterRendering: 1, allowTaint : true}).then(canvas => {
+      var link = document.createElement('a');
+      link.download = 'modifiedImage.png';
+      link.setAttribute('crossOrigin', 'anonymous');
+      try{
+        link.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+      }
+      catch(e){
+        console.log(e)
+        alert("DataURL security error")
+      }
+      link.click();
     });
   }
+
   saveBtn.addEventListener("click", save)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Reset modification button set up
+
+right.images = [["data:image/jpg;base64, " + img,0,0,0,0,0]];
+let currentUndoPosition = 0;
 
 let resetBtn = document.createElement("button")
 resetBtn.id = "reset"+numberImgs;
@@ -759,16 +792,27 @@ resetBtn.className="btnUi";
 left.appendChild(resetBtn)
 
 function reset(){
+
+  // Reset all values to 0
   $("#contrastR" + numberImgs).val(0)
   $("#brightR" + numberImgs).val(0)
   $("#expoR" + numberImgs).val(0)
   $("#sharpR" + numberImgs).val(0)
   $("#satR" + numberImgs).val(0)
+  valBrightDisplay.innerHTML = document.getElementById("brightR" + numberImgs).value+" ";
+  valExpoDisplay.innerHTML = document.getElementById("expoR" + numberImgs).value+" ";
+  valSharpDisplay.innerHTML = document.getElementById("sharpR" + numberImgs).value+" ";
+  valContrDisplay.innerHTML = document.getElementById("contrastR" + numberImgs).value+" ";
+  valSatDisplay.innerHTML = document.getElementById("satR" + numberImgs).value+" ";
 
   Caman("#canvasId" + numberImgs, image_, function () {
     this.revert(false);
     this.render();
     });
+
+    // Reset history array
+    right.images = [["data:image/jpg;base64, " + img,0,0,0,0,0]];
+    currentUndoPosition = 0;
   };
 
   resetBtn.addEventListener("click", reset);
@@ -785,7 +829,6 @@ left.appendChild(unDoreDoDiv);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Undo button set up
 
-
 let undoBtn = document.createElement("button");
 undoBtn.id = "undo"+numberImgs;
 undoBtn.innerText = "Undo"
@@ -793,14 +836,31 @@ undoBtn.className="btnUi";
 undoBtn.style.flex = "1"
 unDoreDoDiv.appendChild(undoBtn)
 
-right.images = [];
-let currentUndoPosition = -1;
-
 function undo(){
+
   if(currentUndoPosition > 0){
     currentUndoPosition--;
-    console.log(right.images,currentUndoPosition)
-    // CHANGER IMAGE + CURSEURS
+
+    
+    canvas.width = image_.width;
+    canvas.height = image_.height;
+    image_.src = right.images[currentUndoPosition][0];
+    ctx.drawImage(image_, 0, 0, image_.width, image_.height);
+
+
+    $("#contrastR" + numberImgs).val(right.images[currentUndoPosition][1])
+    $("#brightR" + numberImgs).val(right.images[currentUndoPosition][2])
+    $("#expoR" + numberImgs).val(right.images[currentUndoPosition][3])
+    $("#sharpR" + numberImgs).val(right.images[currentUndoPosition][4])
+    $("#satR" + numberImgs).val(right.images[currentUndoPosition][5])
+    
+    valContrDisplay.innerHTML = right.images[currentUndoPosition][1]+" ";
+    valBrightDisplay.innerHTML = right.images[currentUndoPosition][2]+" ";
+    valExpoDisplay.innerHTML = right.images[currentUndoPosition][3]+" ";
+    valSharpDisplay.innerHTML = right.images[currentUndoPosition][4]+" ";
+    valSatDisplay.innerHTML = right.images[currentUndoPosition][5]+" ";
+
+
   }
 }
 
@@ -820,7 +880,7 @@ function undo(){
     if (currentUndoPosition < right.images.length - 1 ){
       currentUndoPosition++;
       
-      console.log(right.images,currentUndoPosition)
+
 
       canvas.width = image_.width;
       canvas.height = image_.height;
@@ -828,9 +888,20 @@ function undo(){
       ctx.drawImage(image_, 0, 0, image_.width, image_.height);
 
 
+      $("#contrastR" + numberImgs).val(right.images[currentUndoPosition][1])
+      $("#brightR" + numberImgs).val(right.images[currentUndoPosition][2])
+      $("#expoR" + numberImgs).val(right.images[currentUndoPosition][3])
+      $("#sharpR" + numberImgs).val(right.images[currentUndoPosition][4])
+      $("#satR" + numberImgs).val(right.images[currentUndoPosition][5])
+      valBrightDisplay.innerHTML = document.getElementById("brightR" + numberImgs).value+" ";
+      valExpoDisplay.innerHTML = document.getElementById("expoR" + numberImgs).value+" ";
+      valSharpDisplay.innerHTML = document.getElementById("sharpR" + numberImgs).value+" ";
+      valContrDisplay.innerHTML = document.getElementById("contrastR" + numberImgs).value+" ";
+      valSatDisplay.innerHTML = document.getElementById("satR" + numberImgs).value+" ";
+
     }
     else{
-      console.log(currentUndoPosition, right.images.length, "not possible")
+      console.log("No more redo")
     }
   }
 
@@ -851,52 +922,66 @@ function filter() {
     valContrDisplay.innerHTML = document.getElementById("contrastR" + numberImgs).value+" ";
     valSatDisplay.innerHTML = document.getElementById("satR" + numberImgs).value+" ";
 
+
     Caman("#canvasId" + numberImgs, image_, function () {
+
+      // Apply filters
       this.revert(false);
-      this.brightness(brightValue).saturation(satValue).exposure(expoValue).sharpen(sharpValue).contrast(contrastValue).render();
+      this.brightness(brightValue).saturation(satValue).exposure(expoValue).sharpen(sharpValue).contrast(contrastValue).render(callback = 
+        
+        // Callback function to be called after rendering
+        function () {
+
+          // If the current image is up to date (can't use the redo button)
+      if (currentUndoPosition == right.images.length - 1){
+
+        // If the image history is not full, add the current image to the history
+        if (right.images.length < 5)
+        {    
+          right.images.push([document.getElementById("canvasId" + numberImgs).toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
+  
+          // Update the current undo position if it's egal to 3 or less
+          if (currentUndoPosition < 4) currentUndoPosition += 1;
+       
+        }
+        // If the image history is full, remove the most ancient image and add the current image to the history
+        else
+        {
+          right.images.shift();
+          right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
+          
+        }
+      }
+
+      // If the current image is not up to date (can use the redo button)
+      else{
+  
+        // We delete the more recent images that are not relevent anymore and add the current image to the history
+        var deleted = right.images.splice(currentUndoPosition +1)
+  
+
+        if (right.images.length < 5)
+        {    
+          right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
+          if (currentUndoPosition < 4) currentUndoPosition += 1;
+        }
+        else
+        {
+          right.images.shift();
+          right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
+        }
+      }
+  
+        });
+    
     });
 
-
-    if (currentUndoPosition == right.images.length){
-      if (right.images.length < 5)
-      {    
-        right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
-        if (currentUndoPosition < 4) currentUndoPosition += 1;
-      }
-      else
-      {
-        right.images.shift();
-        right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
-      }
-    }
-    else{
-      console.log("oui")
-      right.images.splice(currentUndoPosition)
-      if (right.images.length < 5)
-      {    
-        right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
-        if (currentUndoPosition < 4) currentUndoPosition += 1;
-      }
-      else
-      {
-        right.images.shift();
-        right.images.push([canvas.toDataURL(),contrastValue,brightValue,expoValue,sharpValue,satValue]);
-      }
-    }
-
-    console.log(right.images,currentUndoPosition);
-
 }
-
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 right.appendChild(canvas);
 
-displayField.append(set)
-// displayField.insertBefore(set,displayField.firstChild);
+displayField.append(set);
 
 
 var panzoom = Panzoom(canvas,{});
@@ -912,6 +997,7 @@ document.querySelectorAll('input[type="range"]')[numberImgs*5+4].onchange = filt
 
 }
 
+// Version not using canvas, dragging the lens on the image
 function imageComparison(img1, img2){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -933,7 +1019,7 @@ function imageComparison(img1, img2){
   h1.className = "h1ComparisonClass";
 
   const delBtn = document.createElement("button");
-  h1.appendChild(delBtn);
+  set.appendChild(delBtn);
   delBtn.style.position = "relative";
   delBtn.style.top = "-51%";
   delBtn.style.left = "41.6%";
@@ -1008,13 +1094,16 @@ function imageComparison(img1, img2){
 
   set.appendChild(table)
 
-  displayField.appendChild(set)
+  displayField2.appendChild(set)
 
   $(document).ready(function(){
+    // Function from ./lentille/lentille.js
+    displayField3.classList.add("display-flex");
     createUi("myimage1","myresult1", "myimage2", "myresult2", "setId2")
   });
 }
-
+// Discisoft - Metamorpho 
+// Version using canvas, dragging directly the result image
 function imageComparisonCanvas(img1, img2){
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1030,20 +1119,29 @@ function imageComparisonCanvas(img1, img2){
     set.className = "setClass2";
     set.id = "setId2";
     set.classList.add("display-flex");
+
+    
+    displayField3.classList.add("display-flex");
   
     let h1 = document.createElement("h1");
     h1.innerText = "Face Comparison";
     h1.className = "h1ComparisonClass";
   
     const delBtn = document.createElement("button");
-    h1.appendChild(delBtn);
-    delBtn.style.position = "relative";
-    delBtn.style.top = "-51%";
-    delBtn.style.left = "41.6%";
+    set.appendChild(delBtn);
+    delBtn.style.position = "absolute";
+    delBtn.style.top = "2px";
+    delBtn.style.right = "2px";
     delBtn.innerText="✕"
+    delBtn.className = "delBtnClass";
+    delBtn.classList.add("squareBtnClass")
   
     delBtn.addEventListener("click", function(){
-      document.getElementById("setId2").remove();
+      
+      
+      while(displayField3.firstChild){
+        displayField3.removeChild(displayField3.firstChild);
+      }
     });
   
     set.insertBefore(h1, set.firstChild);
@@ -1088,10 +1186,10 @@ function imageComparisonCanvas(img1, img2){
     row=table.insertRow(1)
   
     cel=row.insertCell(0)
-    cel.style.maxWidth=((w/2)-15)+"px"
-    cel.style.maxHeight=((h/2)-15)+"px"
-    cel.style.width=((w/2)-15)+"px"
-    cel.style.height=((h/2)-15)+"px"
+    cel.style.maxWidth=((w/3)-15)+"px"
+    cel.style.maxHeight=((h/3)-15)+"px"
+    cel.style.width=((w/3)-15)+"px"
+    cel.style.height=((h/3)-15)+"px"
     let myresultdiv1 = document.createElement("div");
     myresultdiv1.className = "img-container"
     let myimage1 = document.createElement("img");
@@ -1102,10 +1200,10 @@ function imageComparisonCanvas(img1, img2){
     myresultdiv1.appendChild(myimage1)
   
     cel2=row.insertCell(1)
-    cel2.style.maxWidth=((w/2)-15)+"px"
-    cel2.style.maxHeight=((h/2)-15)+"px"
-    cel2.style.width=((w/2)-15)+"px"
-    cel2.style.height=((h/2)-15)+"px"
+    cel2.style.maxWidth=((w/3)-15)+"px"
+    cel2.style.maxHeight=((h/3)-15)+"px"
+    cel2.style.width=((w/3)-15)+"px"
+    cel2.style.height=((h/3)-15)+"px"
     let myresultdiv2 = document.createElement("div");
     myresultdiv2.className = "img-container"
     let myimage2 = document.createElement("img");
@@ -1117,37 +1215,225 @@ function imageComparisonCanvas(img1, img2){
   
     set.appendChild(table)
   
-    displayField.appendChild(set)
+    displayField3.appendChild(set)
   
     $(document).ready(function(){
+      // Function from ./lentille/canvas.js
       createUiCanvSwitch("myimage1","myresult1","mycanvas1","myimage2", "myresult2","mycanvas2" ,"setId2")
     });
+
+    // Table with : feature, positive,negative, comment
+
+    let divTable2 = document.createElement("div");
+    divTable2.className = "tableComp2";
+    divTable2.id = "divTable2Id";
+    divTable2.classList.add("display-flex");
+
+
+    let table2=document.createElement("table");
+    table2.id = "tableId2";
+
+    table2.style.width="100%"
+    table2.style.border="1px solid black"
+    table2.style.backgroundColor = "#eeeeee"
+
+    row=table2.insertRow(0)
+    cel=row.insertCell(0)
+    cel.innerText = "Feature"
+    cel=row.insertCell(1)
+    cel.innerText = "Positive"
+    cel=row.insertCell(2)
+    cel.innerText = "Negative"
+    cel=row.insertCell(3)
+    cel.innerText = "Comment"
+    cel=row.insertCell(4)
+    cel.innerText = "Delete"
+    divTable2.appendChild(table2)
+    displayField3.appendChild(divTable2)
+
+    addLineInTable(table2,"Nose");
+    addLineInTable(table2,"Eyes");
+    addLineInTable(table2,"Mouth");
+    addLineInTable(table2,"Cheek");
+    addLineInTable(table2,"Eyebrow");
+    
+
+    var slideBtn = document.createElement("button");
+    slideBtn.className = "btnUi";
+    slideBtn.classList.add("squareBtnClass");
+    slideBtn.innerHTML = "►";
+    slideBtn.style.position = "relative";
+    slideBtn.style.top = "2px";
+    slideBtn.style.left = "2px";
+
+    divTable2.appendChild(slideBtn);
+    $("#tableId2").slideToggle(0);
+
+    $(slideBtn).click(function(){
+        $("#tableId2").slideToggle(500);
+    });
+
+    //Input area with add button
+    let divAddFeatureInput = document.createElement("div");
+    divAddFeatureInput.className = "divAddFeatureInput";
+    divAddFeatureInput.id = "divAddFeatureInputId";
+    let input = document.createElement("input");
+    input.id = "inputId";
+    input.type = "text";
+    input.placeholder = "Add a new feature";
+    divAddFeatureInput.appendChild(input);
+
+    table2.appendChild(divAddFeatureInput);
+
+    input.addEventListener("keydown", function (e) {
+      if (e.code === "Enter" & input.value.trim().length !== 0) { 
+        addLineInTable(table2,input.value);
+        input.value = ""
+        //Remove divAddFeatureInput and add a new one
+        divAddFeatureInput.remove();
+        table2.appendChild(divAddFeatureInput);
+        input.focus();
+      }
+    });
+
+    //Add download to csv button after divAddFeatureInput
+    let downloadBtn = document.createElement("button");
+    downloadBtn.innerHTML = "Download to csv";
+    downloadBtn.className = "btnUi";
+    downloadBtn.id = "downloadBtnId";
+    divAddFeatureInput.appendChild(downloadBtn);
+
+
+  // Convert table to csv function
+  function tableToCsv() {
+
+    var csv = [];
+    var rows = table2.querySelectorAll("tr");
+    for (var i = 1; i < rows.length; i++) {
+      csvRow = [];
+
+      for (var j = 0; j < rows[i].cells.length; j++) {
+        if (j === 0) {
+          csvRow.push(rows[i].cells[j].innerText);
+        }
+        else if (j === 1 & rows[i].cells[j].firstChild.checked) {
+          csvRow.push("Positive");
+        }
+        else if (j === 2 & rows[i].cells[j].firstChild.checked) {
+          csvRow.push("Negative");
+        }
+        else if (j === 3 & rows[i].cells[j].firstChild.value != "") {
+          csvRow.push(rows[i].cells[j].firstChild.value.replace(/\n/g, " "));
+        }
+        else if(j != 4){
+          csvRow.push("-");
+        }
+
+      }
+      csv.push(csvRow);
+      
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+
+    csv.forEach(function(rowArray) { 
+      let row = rowArray.join(",");
+      csvContent += row + "\r\n";
+    });
+    
+    var encodedUri = encodeURI(csvContent);
+    window.open(encodedUri);
+    
   }
+
+  downloadBtn.onclick = tableToCsv;
+
+}
 
 function treatReturn(response) {
   repStr = response.target.response;
+
+  // Get b64 images array
   imgs = JSON.parse(repStr).frameResponse64;
+
+  // If checked, ask user to choose between all faces detected
   var chooseAmongImgs = document.getElementById("chooseId").checked;
 
-  if (chooseAmongImgs){
-    if (imgs.length != 1) {
-        
-    const displayField2 = document.getElementById("responseDisplay");
+  if (chooseAmongImgs) {
+    const displayField =document.getElementById("responseDisplay")
+
     let set = document.createElement("div");
     set.className = "setShowcaseClass";
     set.classList.add("display-inline");
-
+    
     const header = document.createElement("h1");
     header.innerHTML = "Choose face"
     header.style.textAlign = "center"
     set.appendChild(header);
-    displayField2.appendChild(set);
+    displayField.appendChild(set);
+
+    //create canvas for the imageTotalComp in the set
+    var imageModif = new Image();
+    imageModif.src = "data:image/jpg;base64," + imageTotalModif;
+    let canvas1 = document.createElement("canvas");
+    canvas1.id = "canvasModif";
+
+    var ctx1 = canvas1.getContext("2d");
+
+    imageModif.onload = function(){
+
+      canvas1.width = imageModif.width;
+      canvas1.height = imageModif.height;
+      ctx1.drawImage(imageModif, 0, 0, imageModif.width, imageModif.height);
+      set.appendChild(canvas1);
+
+      for (imgOfFaceWithPos of imgs) {
+        let imgOfFace = imgOfFaceWithPos[0]
+        let posOfFace = imgOfFaceWithPos[1]
+
+        let x1 = posOfFace[0]
+        let y1 = posOfFace[1]
+        let x2 = posOfFace[2]
+        let y2 = posOfFace[3]
+
+        ctx1.strokeStyle = "yellow";
+        ctx1.strokeRect(x1, y1, x2-x1, y2-y1);
+
+        //If we click inside the rectangle
+        canvas1.addEventListener("click", function (e) {
+          if (e.offsetX >= x1 & e.offsetX <= x2 & e.offsetY >= y1 & e.offsetY <= y2) {
+            displayField.removeChild(set);
+            imageModification(imgOfFace);
+          }
+        });
+      }
+    }
+  }
+  else{
+    imageModification(imgs[0][0]);
+  }
+
+/*
+  if (chooseAmongImgs){
+    if (imgs.length != 1) {
+        
+      const displayField2 = document.getElementById("responseDisplay");
+      let set = document.createElement("div");
+      set.className = "setShowcaseClass";
+      set.classList.add("display-inline");
+
+      const header = document.createElement("h1");
+      header.innerHTML = "Choose face"
+      header.style.textAlign = "center"
+      set.appendChild(header);
+      displayField2.appendChild(set);
 
   
-      for (element of imgs) {
+      for (imgOfFaceWithPos of imgs) {
+        var imgOfFace = imgOfFaceWithPos[0]
         let img = document.createElement("img");
-        img.src = "data:image/jpg;base64, " + element;
-        img.element = element;
+        img.src = "data:image/jpg;base64, " + imgOfFace;
+        img.imgOfFace = imgOfFace;
         img.style.margin = "5px"
 
         let divImg = document.createElement("div");
@@ -1155,9 +1441,10 @@ function treatReturn(response) {
         divImg.appendChild(img);
         set.appendChild(divImg);
 
+        // If we click on an image, we send delete the set of images and modify the image
         img.addEventListener("click", function (e) {
           displayField2.removeChild(set);
-          imageModification(e.target.element);
+          imageModification(e.target.imgOfFace);
         });
       }
     }
@@ -1170,6 +1457,7 @@ function treatReturn(response) {
       imageModification(element);
     }
   }
+*/
 
 }
 
@@ -1182,6 +1470,10 @@ function treatReturn2(response){
 
   imgStr = response.target.response;
 
+  // Format the JSON object
+  // allFacesDetected :
+  // [ [base64Image, Dict{['facial_area'][x1,y1,x2,y2],['landmarks']['left_eye'] }] , ...]
+
   allFacesDetected1 = JSON.parse(imgStr).features1
   allFacesDetected2 = JSON.parse(imgStr).features2
 
@@ -1193,7 +1485,132 @@ function treatReturn2(response){
     imageComparisonCanvas(allFacesDetected1[0][0], allFacesDetected2[0][0])
   }
 
+  // Show the image in a canvas and draw square around the faces
 
+  // If there are more than one face detected in the first image
+  if (allFacesDetected1.length != 1){
+
+    const displayField2 = document.getElementById("responseDisplay");
+    
+    let set = document.createElement("div");
+    set.className = "setShowcaseClass";
+    set.classList.add("display-inline");
+    
+    const header = document.createElement("h1");
+    header.innerHTML = "Choose face"
+    header.style.textAlign = "center"
+    set.appendChild(header);
+    displayField2.appendChild(set);
+
+    //create canvas for the imageTotalComp in the set
+    var imageComp1 = new Image();
+    imageComp1.src = "data:image/jpg;base64," + imageTotalComp1;
+    let canvas1 = document.createElement("canvas");
+    canvas1.id = "canvasComp1";
+    
+    
+    var ctx1 = canvas1.getContext("2d");
+
+    imageComp1.onload = function(){
+
+      canvas1.width = imageComp1.width;
+      canvas1.height = imageComp1.height;
+      ctx1.drawImage(imageComp1, 0, 0, imageComp1.width, imageComp1.height);
+      set.appendChild(canvas1);
+
+      // Draw rectangle around the faces detected in the first image
+      for (element of allFacesDetected1) {
+
+        let x1 = element[2][0];
+        let y1 = element[2][1];
+        let x2 = element[2][2];
+        let y2 = element[2][3];
+        let face = element[0];
+        
+        ctx1.strokeStyle = "yellow";
+        ctx1.strokeRect(x1, y1, x2-x1, y2-y1);
+
+        // If we click inside the rectangle
+        canvas1.addEventListener("click", function (e) {
+          if (e.offsetX >= x1 & e.offsetX <= x2 & e.offsetY >= y1 & e.offsetY <= y2) {
+            displayField2.removeChild(set);
+            chosen1 = face;
+            if (chosen2 != null){
+              imageComparisonCanvas(chosen1, chosen2)
+            }
+          }
+        });
+      }
+    }
+  }
+  else {
+    chosen1 = allFacesDetected1[0][0];
+  } 
+
+
+  // If there are more than one face detected in the second image
+  if (allFacesDetected2.length != 1){
+
+    const displayField2 = document.getElementById("responseDisplay");
+    let set = document.createElement("div");
+    set.className = "setShowcaseClass";
+    set.classList.add("display-inline");
+
+    const header = document.createElement("h1");
+    header.innerHTML = "Choose face"
+
+    header.style.textAlign = "center"
+    set.appendChild(header);
+    displayField2.appendChild(set);
+
+    //create canvas for the imageTotalComp in the set
+    var imageComp2 = new Image();
+    imageComp2.src = "data:image/jpg;base64," + imageTotalComp2;
+    let canvas2 = document.createElement("canvas");
+    canvas2.id = "canvasComp2";
+
+    var ctx2 = canvas2.getContext("2d");
+
+    imageComp2.onload = function(){
+
+      canvas2.width = imageComp2.width;
+      canvas2.height = imageComp2.height;
+
+      ctx2.drawImage(imageComp2, 0, 0, imageComp2.width, imageComp2.height);
+
+      set.appendChild(canvas2);
+
+      // Draw rectangle around the faces detected in the second image
+      for (element of allFacesDetected2) {
+
+        let x1 = element[2][0];
+        let y1 = element[2][1];
+        let x2 = element[2][2];
+        let y2 = element[2][3];
+        let face = element[0];
+
+        ctx2.strokeStyle = "yellow";
+        ctx2.strokeRect(x1, y1, x2-x1, y2-y1);
+
+        // If we click inside the rectangle
+        canvas2.addEventListener("click", function (e) {
+          if (e.offsetX >= x1 & e.offsetX <= x2 & e.offsetY >= y1 & e.offsetY <= y2) {
+            displayField2.removeChild(set);
+            chosen2 = face;
+            if (chosen1 != null){
+              imageComparisonCanvas(chosen1, chosen2)
+            }
+          }
+        });
+      }
+    }
+  }
+  else {
+    chosen2 = allFacesDetected2[0][0];
+  }
+
+// Display all detected faces if there are more than one
+/*
   // Check if there were more than one face detected in the images
   if (allFacesDetected1.length != 1){
     
@@ -1270,6 +1687,7 @@ function treatReturn2(response){
   else {
     chosen2 = allFacesDetected2[0][0];
   }
+*/
 
 }
 

@@ -2,6 +2,7 @@
 from cmath import atan
 import os.path
 from unicodedata import name
+from unittest import result
 from cv2 import imread
 import matplotlib.pyplot as plt
 from matplotlib.text import OffsetFrom
@@ -19,6 +20,8 @@ import math
 from rembg import remove
 from scipy import ndimage
 from os.path import isfile, join
+
+from torch import normal
 
 
 def crop(img,xt,yt,xb,yb,ratio):
@@ -70,6 +73,7 @@ def cropAndRotate(img,xt,yt,xb,yb,ratio,xl,yl,xr,yr):
     # plt.imshow(turned, interpolation='nearest')
     # plt.show()
 
+    # Use in order to crop the image too big, and then rotate it, and then crop it again to get rid of all the black borders
     xtT = 0
     ytT = 0
     xbT = turned.shape[1]
@@ -98,6 +102,57 @@ def rotateEyes(img,xl,yl,xr,yr):
     theta = math.degrees(math.atan2(deltaY,deltaX))
 
     return theta
+
+def cropNormalizeAndRotate(img,xl,yl,xr,yr):
+
+    distanceBetweenEyes = 60
+    widthImage = 240
+    heightImage = 320
+    eyesPositionY = heightImage/2
+    distanceBetweenleftBorderAndLeftEye = 150
+
+    # xl yr : left eye x and y
+    # xr yr : right eye x and y
+
+    actualDistanceBetweenEyes = abs(xl-xr)
+
+    # ratio by which the image needs to be scaled to get the desired distance between eyes+
+    ratio = distanceBetweenEyes/actualDistanceBetweenEyes
+
+    topLeftX = int(xl - (distanceBetweenleftBorderAndLeftEye)/ratio)
+    topLeftY = int(yl - (heightImage/2)/ratio)
+
+    # topLeftX and topLeftYcan't be under 
+    if topLeftX < 0:    
+        topLeftX = 0
+    if topLeftY < 0:
+        topLeftY = 0
+
+    bottomRightX = int(xl + (widthImage - distanceBetweenleftBorderAndLeftEye)/ratio)
+    bottomRightY = int(yl + (heightImage/2)/ratio)
+
+    # bottomRightX and bottomRightY can't be over the image
+
+    if bottomRightX > img.shape[1]:
+        bottomRightX = img.shape[1]
+    if bottomRightY > img.shape[0]:
+        bottomRightY = img.shape[0]
+
+    # Cropped image
+    cropped = img[int(topLeftY) : int(bottomRightY), int(topLeftX) : int(bottomRightX)]
+
+
+
+    # Rotated image
+    theta = rotateEyes(cropped,xl,yl,xr,yr)
+    # theta = 0
+
+    # rotate the image
+    turned = ndimage.rotate(cropped,theta,reshape = False)
+
+
+    return turned
+
 
 def isPath(path):
     return os.path.isfile(path)
@@ -198,7 +253,7 @@ def deepface_analyze_single(path="", b64 = "", ratio = 1.6, rmbg = False):
     return base64Img.decode("ascii")
 
 # Detection of multiple faces features in an image using RetinaFace.detect_faces and then crop and rotate the faces, returns array b64 images
-def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = False):
+def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = False, normalize = "true"):
     """
     Extracts all detected faces in the image
     param path: path to the base image
@@ -210,6 +265,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
  
     #Return variable, contains all faces b64 datas
     faces = []
+
 
     if not path and not b64:
         return "no image given", 400
@@ -258,14 +314,23 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
 
             # Coordinates of both of the eyes
             xl,yl,xr,yr = j['landmarks']['left_eye'][0],j['landmarks']['left_eye'][1],j['landmarks']['right_eye'][0],j['landmarks']['right_eye'][1]
-            # # Calculation of the tilt angle of the face
-
 
             # Coordinates of the face box in its whole
             xt,yt,xb,yb = j['facial_area'][0],j['facial_area'][1],j['facial_area'][2],j['facial_area'][3]
             # Crop around the face box, is usually enlarged
 
-            imageFromArray = Image.fromarray(cropAndRotate(img,xt,yt,xb,yb,ratio,xl,yl,xr,yr))
+            norm = normalize
+
+
+            if (norm == "true"):
+            
+                imageFromArray = Image.fromarray(cropNormalizeAndRotate(img,xl,yl,xr,yr))
+                
+            
+            if (norm == "false"):
+
+                imageFromArray = Image.fromarray(cropAndRotate(img,xt,yt,xb,yb,ratio,xl,yl,xr,yr))
+                
 
             if rmbg : imageFromArray = remove(imageFromArray)
             
@@ -274,8 +339,10 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
             imageFromArray.save(buffered,format="PNG")
             base64Img = base64.b64encode(buffered.getvalue())
             # Append the current face to the list of faces
-            faces.append(base64Img.decode("ascii"))
+            faces.append([base64Img.decode("ascii"), [float(xt),float(yt),float(xb),float(yb)]])
+
         if exists(path): os.remove(path)
+
         return faces
 
 def retinaface_detect_faces_multiple_data_or_file(imgDataOrFile = "", ratio = 1.6):
@@ -318,8 +385,6 @@ def detection_faces(path="", b64=""):
                 img = imread(f.name)
                 path=f.name
                 
-                
-
         except Exception as e:
             print (e)
             # TODO: treat the error
