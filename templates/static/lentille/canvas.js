@@ -53,7 +53,7 @@ function panZoomCanvasAsync(imgID, resultID, canvasID, imgID2, result2ID, canvas
     var result2 = document.getElementById(result2ID);
 
     canvas2.height = result2.offsetHeight;
-    canvas2.width = result2.offsetWidth;  
+    canvas2.width = result2.offsetWidth;
 
     var imgCanvas2 = new Image();
     imgCanvas2.src = image2.src;
@@ -110,6 +110,9 @@ function panZoomCanvasAsync(imgID, resultID, canvasID, imgID2, result2ID, canvas
 
         lens.style.left = -(posX*image.width)/(image.naturalWidth*cameraZoom) + "px";
         lens.style.top = -(posY*image.height)/(image.naturalHeight*cameraZoom) + "px";
+
+        //Draw registered circles on the canvas
+        //For through all 
    }
 
     imgCanvas.onload = draw()  
@@ -335,6 +338,7 @@ function panZoomCanvasAsync(imgID, resultID, canvasID, imgID2, result2ID, canvas
     canvas.addEventListener( 'wheel', (e) => adjustZoom(e,zoomAmount=e.deltaY*scrollSensitivity))
     canvas.addEventListener( 'mouseleave', (e)=> isDragging = false)
     lens.addEventListener('mousedown',freezeUnfreeze)
+
 
     canvas2.addEventListener('mousedown', onPointerDown2)
     canvas2.addEventListener('mouseup', onPointerUp2)
@@ -677,6 +681,10 @@ function panZoomCanvasSwitch(imgID, resultID, canvasID, imgID2, result2ID, canva
     var image = document.getElementById(imgID);
     var ctx = canvas.getContext('2d');
     var result = document.getElementById(resultID);
+    var minuties = [];
+    var numberMinutie = 0;
+    var scale = 1;
+    var baseSize = Math.max(image.naturalHeight,image.naturalWidth)/20
 
     // Ajust canvas size to fit the result div
     canvas.height = result.offsetHeight;
@@ -780,14 +788,12 @@ function panZoomCanvasSwitch(imgID, resultID, canvasID, imgID2, result2ID, canva
 
     var areShared = false
     
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Draw canvas modification on the first result
 
     function draw(){
 
-        
         // canvas.height = result.offsetHeight;
         // canvas.width = result.offsetWidth;  
         
@@ -798,13 +804,28 @@ function panZoomCanvasSwitch(imgID, resultID, canvasID, imgID2, result2ID, canva
 
         ctx.drawImage(imgCanvas, posX, posY, image.naturalWidth*cameraZoom, image.naturalHeight*cameraZoom);
         
+
+        
         // Change position of the lens on the base image
         lens.style.width = (canvas.width*image.width)/(image.naturalWidth*cameraZoom) + "px";
         lens.style.height = (canvas.height*image.height)/(image.naturalHeight*cameraZoom) + "px";
 
         lens.style.left = -(posX*image.width)/(image.naturalWidth*cameraZoom) + "px";
         lens.style.top = -(posY*image.height)/(image.naturalHeight*cameraZoom) + "px";
+
+        for (var minutie of minuties){
+
+            var circle = new Image()
+            circle.src = 'static/image/red-circle.png'
+            ctx.drawImage(circle,
+                (minutie[0]*cameraZoom+posX)-baseSize*0.5*cameraZoom*minutie[3], 
+                (minutie[1]*cameraZoom+posY)-baseSize*0.5*cameraZoom*minutie[3], 
+                baseSize*cameraZoom*minutie[3], 
+                baseSize*cameraZoom*minutie[3])
+
+        }
     }
+    console.log(image.naturalWidth,image.naturalHeight, cameraZoom)
 
     imgCanvas.onload = draw()  
 
@@ -1177,6 +1198,39 @@ function panZoomCanvasSwitch(imgID, resultID, canvasID, imgID2, result2ID, canva
     canvas.addEventListener( 'wheel', (e) => adjustZoom(e,zoomAmount=e.deltaY*scrollSensitivity))
     canvas.addEventListener( 'mouseleave', (e)=> isDragging = false)
     lens.addEventListener('mousedown',freezeUnfreeze)
+    canvas.addEventListener('dblclick', function(e){
+        e.preventDefault()
+
+        var topLeftOfLens = {x:(-posX)/(cameraZoom), 
+                             y:(-posY)/(cameraZoom)} 
+
+        var lensWidth = (canvas.width*image.width)/(image.naturalWidth*cameraZoom)
+        var lensHeight = (canvas.height*image.height)/(image.naturalHeight*cameraZoom)
+                         
+        var sizeOfLens = {width : image.naturalWidth*(lensWidth/image.width),
+                          height : image.naturalHeight*(lensHeight/image.height)}
+
+        var fractionOfClickInCanvas = {x : (getEventLocation(e).x - e.target.getBoundingClientRect().left)/canvas.offsetHeight, 
+                                       y : (getEventLocation(e).y - e.target.getBoundingClientRect().top)/canvas.offsetWidth }
+        
+        var posClickedOnRealImage = {x : Math.floor(topLeftOfLens.x + sizeOfLens.width*fractionOfClickInCanvas.x), 
+                                     y : Math.floor(topLeftOfLens.y + sizeOfLens.height*fractionOfClickInCanvas.y)}        
+
+        minuties.push([posClickedOnRealImage.x,posClickedOnRealImage.y,numberMinutie, scale]);
+        numberMinutie = numberMinutie + 1;
+
+        console.log("Taille image : " + image.naturalWidth,image.naturalHeight + 
+        "\nPosition souris : " + posClickedOnRealImage.x,posClickedOnRealImage.y +
+        "\nClic dans le canvas : " + fractionOfClickInCanvas.x, fractionOfClickInCanvas.y +
+        "\nTop of Lens : " + topLeftOfLens.x,topLeftOfLens.y +
+        "\nSize of lens : " + sizeOfLens.width,sizeOfLens.height)
+        draw()
+
+        })
+
+
+    // Math.floor((posX*image.width)/(image.naturalWidth*cameraZoom)),
+    // Math.floor((posY*image.height)/(image.naturalHeight*cameraZoom))
 
     canvas2.addEventListener('mousedown', onPointerDown2)
     canvas2.addEventListener('mouseup', onPointerUp2)
@@ -1184,6 +1238,7 @@ function panZoomCanvasSwitch(imgID, resultID, canvasID, imgID2, result2ID, canva
     canvas2.addEventListener( 'wheel', (e) => adjustZoom2(e,zoomAmount=e.deltaY*scrollSensitivity2))
     canvas2.addEventListener( 'mouseleave', (e)=> isDragging2 = false)
     lens2.addEventListener('mousedown',freezeUnfreeze)
+
 
     var swapbtn = document.getElementById("swapbtn")
     swapbtn.addEventListener("click", function(){
@@ -1296,7 +1351,6 @@ function createUiCanvSwitch(imgID, resultID, canvasID, imgID2, resultID2,canvasI
         btnPlace = document.body;
     }
     
-
     const sync = document.createElement("button")
     sync.id = "swapbtn"
     const downlo = document.createElement("button")

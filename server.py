@@ -194,7 +194,9 @@ class STM(Resource):
                 :param imgDataOrFile: file data or url of the first picture
                 :return: dictionary with the facial key positions in the picture (facial area, eyes, nose, mouth)
                 """ 
-                feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face1[0])
+
+                if (len(face1) != 2) : feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face1)
+                else : feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face1[0])
                 
                 if feature['face_1']['score'] != 0 :
 
@@ -206,7 +208,9 @@ class STM(Resource):
                     feature['face_1']['landmarks']['mouth_left'] =  [float (x) for x in feature['face_1']['landmarks']['mouth_left']]
 
                     temp = feature['face_1']
-                featuresImg1.append((face1[0],temp, [float (x) for x in face1[1]]))
+                
+                if (len(face1) != 2) : featuresImg1.append(face1)
+                else : featuresImg1.append((face1[0],temp, [float (x) for x in face1[1]]))
 
 
             featuresImg2 = []
@@ -218,7 +222,8 @@ class STM(Resource):
                 :param imgDataOrFile: file data or url of the first picture
                 :return: dictionary with the facial key positions in the picture (facial area, eyes, nose, mouth)
                 """ 
-                feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face2[0])
+                if (len(face2) != 2) : feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face2)
+                else : feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face2[0])
                 
                 if feature['face_1']['score'] != 0 :
 
@@ -230,7 +235,9 @@ class STM(Resource):
                     feature['face_1']['landmarks']['mouth_left'] =  [float (x) for x in feature['face_1']['landmarks']['mouth_left']]
 
                     temp = feature['face_1']
-                featuresImg2.append((face2[0],temp,[float (x) for x in face2[1]]))
+
+                if (len(face2) != 2) : featuresImg2.append(face2)
+                else : featuresImg2.append((face2[0],temp,[float (x) for x in face2[1]]))
 
             #Response in json format sending the base64 data of all detected faces with the facial key positions
             response = jsonify({"features1": featuresImg1, "features2": featuresImg2})

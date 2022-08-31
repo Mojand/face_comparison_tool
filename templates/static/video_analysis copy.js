@@ -1358,7 +1358,7 @@ function treatReturn(response) {
   // If checked, ask user to choose between all faces detected
   var chooseAmongImgs = document.getElementById("chooseId").checked;
 
-  // IF at least one face is detected
+
   if (imgs[0].length == 2){
     if (chooseAmongImgs) {
       const displayField =document.getElementById("responseDisplay")
@@ -1385,70 +1385,8 @@ function treatReturn(response) {
 
         canvas1.width = imageModif.width;
         canvas1.height = imageModif.height;
-
+        ctx1.drawImage(imageModif, 0, 0, imageModif.width, imageModif.height);
         set.appendChild(canvas1);
-        //ctx1.drawImage(imageModif, 0, 0, imageModif.width, imageModif.height);
-
-        const imgInstance = new fabric.Image(imageModif, {
-          left : 0,
-          top : 0,
-          width : imageModif.width,
-          height : imageModif.height,
-          hasControls : false,
-          lockMovementX: true,
-          lockMovementY : true,
-          hoverCursor : "default",
-          selectable : false,
-        })
-        const canvasFabric = new fabric.CanvasEx('canvasModif');
-        var rectSelect = new fabric.Rect({
-          width: 100,
-          height: 100,
-          left: 10,
-          top: 10,
-          opacity: 0.5,
-          lockRotation : true,
-          cornerSize : 10,
-          lockSkewingX : true,
-          lockSkewingY : true,
-
-        });
-        
-        rectSelect.on('object:dblclick', function (e) {
-
-          console.log(
-          Math.floor(rectSelect.top),
-          Math.floor(rectSelect.left),
-          Math.floor(100*rectSelect.zoomX),
-          Math.floor(100*rectSelect.zoomY)
-          );
-
-          let hidden_canvas = document.createElement("canvas");
-          hidden_canvas.width = Math.floor(100*rectSelect.zoomX);
-          hidden_canvas.height = Math.floor(100*rectSelect.zoomY);
-          var hidden_ctx = hidden_canvas.getContext('2d');
-
-          hidden_ctx.drawImage(
-            imageModif,
-
-            Math.floor(rectSelect.left),
-            Math.floor(rectSelect.top),
-            Math.floor(100*rectSelect.zoomX),
-            Math.floor(100*rectSelect.zoomY),
-            0,
-            0,
-            Math.floor(100*rectSelect.zoomX),
-            Math.floor(100*rectSelect.zoomY),
-          );
-
-          displayField.removeChild(set);
-          imageModification(hidden_canvas.toDataURL().replace("data:image/png;base64,",""));
-          
-
-        });
-
-
-        canvasFabric.add(imgInstance, rectSelect)
 
         for (imgOfFaceWithPos of imgs) {
           let imgOfFace = imgOfFaceWithPos[0]
@@ -1459,45 +1397,18 @@ function treatReturn(response) {
           let x2 = posOfFace[2]
           let y2 = posOfFace[3]
 
-          //////////////////////////////////////
+          ctx1.strokeStyle = "yellow";
+          ctx1.strokeRect(x1, y1, x2-x1, y2-y1);
 
-          const rect = new fabric.Rect({
-            width: x2-x1,
-            height: y2-y1,
-            left: x1,
-            top: y1,
-            opacity: 0.3,
-            hasControls : false,
-            lockMovementX: true,
-            lockMovementY : true,
-            hoverCursor : "default",
-            selectable : false,
-            backgroundColor : "yellow"
-          });
-
-          // ctx1.strokeStyle = "yellow";
-          // ctx1.strokeRect(x1, y1, x2-x1, y2-y1);
-
-          // //If we click inside the rectangle
-          // canvas1.addEventListener("click", function (e) {
-          //   if (e.offsetX >= x1 & e.offsetX <= x2 & e.offsetY >= y1 & e.offsetY <= y2) {
-          //     displayField.removeChild(set);
-          //     imageModification(imgOfFace);
-          //   }
-          // });
-
-          rect.on('mousedown', function(e){
           //If we click inside the rectangle
-            displayField.removeChild(set);
-            imageModification(imgOfFace);
-            console.log(imgOfFace)
+          canvas1.addEventListener("click", function (e) {
+            if (e.offsetX >= x1 & e.offsetX <= x2 & e.offsetY >= y1 & e.offsetY <= y2) {
+              displayField.removeChild(set);
+              imageModification(imgOfFace);
+            }
           });
-
-
-          canvasFabric.add(rect)
         }
       }
-
     }
     else{
       imageModification(imgs[0][0]);
