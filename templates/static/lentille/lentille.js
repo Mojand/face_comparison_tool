@@ -1,5 +1,4 @@
 
-
 function imageZoomAsync(imgID, resultID, imgID2, resultID2) {
   /*
   Creates a lens on each image, and moves it around when the cursor is moved over the image. The content of the lens is zoomed and displayed in the result DIV.

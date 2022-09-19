@@ -184,7 +184,6 @@ def brisqueScore(url):
 
     return calculate_image_quality_score(brisque_features)
 
-
 def scoreComparison(imgs):
     scores = []
     bestscore = 101
@@ -234,7 +233,6 @@ urls = ['src/neutral.jpeg','src/worse.jpeg','src/better.jpeg','src/sharpen.jpeg'
 scores = scoreComparison(urls)
 # print(scores)
 # print(urls)
-
 
 #Show four images in a grid
 fig = plt.figure(figsize=(8,8))

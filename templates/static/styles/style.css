@@ -96,14 +96,12 @@
 .setClass{
   width:75%;
 
-  border: solid;
+
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-
-  border: 1px solid #c1c2c8;
-  background-color: #eeeeee;
+  box-shadow: 0px 3px 7px -2px rgb(99, 99, 99);
 
 }
 
@@ -116,23 +114,30 @@
   /* margin-left: auto;
   margin-right: auto; */
 
-  border: 1px solid #c1c2c8;
-  background-color: #eeeeee;
+  /*border: 1px solid #c1c2c8;
+  */
+  background-color: #ffffff;
+
 }
 
 .h1ComparisonClass, .h1MoficationClass{
   
-  padding: 17px;
+  padding: 8px;
   border-bottom: 1px solid #c1c2c8;
   background: linear-gradient(to bottom, #ffffff 0%, #dde0e6 100%);
   border-top-left-radius: 3px;
   border-top-right-radius: 3px; 
   text-align: center;
+  color: #11264d;
+  border: 1px solid #d5d5d5;
+
 }
 
 .setShowcaseClass{
-  border: solid
+  box-shadow: 0px 3px 7px -2px rgb(34, 33, 33);
+  margin-top: 20px;
 }
+
 
 .tableComp{
   width:100%;
@@ -166,6 +171,7 @@ tbody.tableComp{
 
   width: 100%;
   border: solid 1px;
+  background-color: #ffffff;
 }
 
 tr.tableComp{
@@ -187,21 +193,35 @@ tr.tableComp{
 
 table.tableComp td,table.tableComp tr,table.tableComp th{
 
-  border: 1px solid;
+ /* border: 1px solid;
+
   border-radius: 1px;
+   */
+  padding: 6px;
 }
 
 table#tableId2 td,table#tableId2 tr,table#tableId2 th{
 
-  border: 1px solid;
   border-radius: 1px;
   text-align: center;
+  border-bottom: 1px solid #c1c2c8;
+
 }
 
 table.tableComp tbody{
-  background-color: #f2f2f2;
+  /* background-color: #ffffff;
+  margin-right: auto;
+  margin-left: auto; */
+
+  background-color: #ffffff;
   margin-right: auto;
   margin-left: auto;
+  padding: 8px;
+
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  text-align: center;
+  color: #11264d;
 }
 
 .btnDeleteClass{
@@ -226,9 +246,8 @@ table.tableComp tbody{
   margin-right: 10px;
   margin-left: 10px;
   margin-bottom: 10px;
-
-  border: 1px solid #c1c2c8;
-  background-color: #d0d0d0;
+  box-shadow: 0px 3px 7px -2px rgb(99, 99, 99);
+  padding: 3px;
 }
 
 .left-div_Comp{
@@ -282,13 +301,33 @@ table.tableComp tbody{
   border-radius: 3px 3px;
   box-shadow: inset 0 3px 0 -2px rgba(255, 255, 255, 0.6);
   background: linear-gradient(to bottom, #5e9af8 0%, #2f6af2 100%);
+  margin: 1px;
 }
+
+@media screen and (width > 600px){
+  .btnComp{
+    display: block;
+    position: absolute;
+  }
+}
+
+@media screen and (width < 600px){
+  .btnComp{
+    display: block;
+    /* position: inherit !important; */
+  }
+
+}
+
+/* .btnComp{
+  position: absolute
+} */
 
 .delBtnClass{
 
   cursor: pointer;
   border: 1px solid #000000;
-  color: #000000;
+  color: #ffffff;
   font-weight: bold;
   border-radius: 3px 3px;
   box-shadow: inset 0 3px 0 -2px rgba(255, 255, 255, 0.6);
@@ -299,10 +338,11 @@ table.tableComp tbody{
 input[type=range]::-moz-range-track {
   background-color: #2371a5;
   height: 6px;
+  border-radius: 7px;
 }
 
 input[type=range]{
-  background: #d0d0d0;
+  background: #ffffff;
 }
 
 input[type=range]::-ms-track {
@@ -338,9 +378,8 @@ margin-right: 10px;
 margin-left: 10px;
 margin-bottom: 10px;
 min-height: 302px;
-
-border: 1px solid #c1c2c8;
-background-color: #d0d0d0;
+box-shadow: 0px 3px 7px -2px rgb(99, 99, 99);
+border-radius: 10px;
 
 }
 
@@ -902,7 +941,7 @@ input{
 	box-sizing: border-box;
 	
 	border-radius: 4px;
-	background-color: #f8f8f8;
+	background-color: #ffffff;
 	font-size: 16px;
 	resize: none;
 }
@@ -1624,4 +1663,164 @@ mark::after {
 
 input:invalid {
   border: red solid 3px;
+}
+
+/*--------------------------------*/
+
+.firstRowTableImage{
+    max-width: 45%;
+    max-height: 45%;
+    width: 50%;
+    height: 45%;
+    box-shadow: 0px 4px 8px 2px rgb(99, 99, 99);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.secondRowTableImage{
+  
+  box-shadow: 0px 4px 8px 2px rgb(99, 99, 99);
+}
+
+.featureTable{
+  
+margin-left: 9px;
+box-shadow: 0px 3px 7px -2px rgb(99, 99, 99);
+border-radius: 3px;
+width: 100%;
+
+}
+
+.featureNames{
+  background: linear-gradient(to bottom, #ffffff 0%, #dde0e6 100%);
+border-top-left-radius: 3px;
+border-top-right-radius: 3px;
+text-align: center;
+color: #11264d;
+border: 1px solid #d5d5d5;
+padding: 1px;
+font-weight: bold;
+}
+
+.silderLabel{
+  font-weight: bold;
+  text-align: center;
+
+}
+  /*-----------------------*/
+
+
+#drop-region, #drop-region2 {
+	background-color: #fff;
+	border-radius:10px;
+	text-align: center;
+	cursor:pointer;
+	transition:.3s;
+  height: 150px;
+  width: 100%;
+  overflow: auto;
+  box-shadow: 0px 4px 8px 2px rgb(213, 213, 213);
+}
+
+#drop-region:hover, #drop-region2:hover {
+	box-shadow:0 0 45px rgba(0,0,0,0.3);
+}
+
+.bench {
+
+    width: 100%;
+    min-height: 100%;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 0 35px rgba(68, 68, 68, 0.1);
+}
+.bench .image-view {
+    display: inline-block;
+	position:relative;
+	margin-right: 13px;
+	margin-top: 13px;
+}
+.bench .image-view img {
+    max-height: 100px;
+}
+.bench .overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    z-index: 2;
+}
+
+.bench .overlay:hover{
+    background-color: rgba(80, 80, 80, 0.5);
+    transition: 0.4s ease-out;
+
+}
+
+.deleteClick{
+    height: 20px;
+    width: 20px;
+    background-color: red;
+    position: relative;
+    top: 0px;
+    right: 0px;
+}
+
+.numberClass{
+
+width: 20px;
+height: 20px;
+text-align: center;
+box-shadow: inset 0 3px 0 -2px rgba(255, 255, 255, 0.6);
+background: linear-gradient(to bottom, #5e9af8 0%, #2f6af2 100%);
+border-radius: 50%;
+border: solid 1px black;
+cursor: grab;
+cursor: -moz-grab;
+cursor: -webkit-grab;
+
+display: inline-block;
+
+text-align: center;
+vertical-align: middle;
+line-height: 20px;
+
+color: white;
+
+}
+
+.numberClass:active{
+cursor: grabbing;
+
+}
+
+.screenBtnClass{
+
+  cursor: pointer;
+  border: 1px solid #000000;
+  color: #ffffff;
+  font-weight: bold;
+  border-radius: 3px 3px;
+  box-shadow: inset 0 3px 0 -2px rgba(255, 255, 255, 0.6);
+  background: linear-gradient(to bottom, #5e9af8 0%, #2f6af2 100%);
+  height: 22px;
+  width: 22px;
+}
+
+.screenBtnClassClicked{
+
+  cursor: pointer;
+  border: 1px solid #000000;
+  color: #ffffff;
+  font-weight: bold;
+  border-radius: 3px 3px;
+  box-shadow: inset 0 3px 0 -2px rgba(255, 255, 255, 0.6);
+  background: linear-gradient(to bottom, #11c61c 0%, #5af22f 100%);
+  height: 22px;
+  width: 22px;
+
+}
+
+.hoverImg{
+  border: solid 4px;
 }

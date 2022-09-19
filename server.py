@@ -30,7 +30,7 @@ def index():
 
 class STM(Resource):
 
-    def post(self):
+    def post(self): 
 
         # Case 1 : Modification of the image
         """

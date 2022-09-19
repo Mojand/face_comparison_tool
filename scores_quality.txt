@@ -1,0 +1,2 @@
+img;score
+/home/csd/Documents/Stage_PJGN/Test/Test_Deepface/Database/photo_questions2/beyonce_question_1.jpg;[0.37213603]

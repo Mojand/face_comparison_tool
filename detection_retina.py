@@ -25,6 +25,14 @@ from torch import normal
 
 
 def crop(img,xt,yt,xb,yb,ratio):
+    """
+    Crops an image according to the box around the face, scaled by a certain ratio
+    :param img: image to be cropped
+    :param xt, yt: coordinates of the topleft corner of the box
+    :param xb, yb: coordinates of the bottomright corner
+    :param ratio: 
+    :return: cropped image
+    """
 
     frame = img
 
@@ -63,7 +71,16 @@ def crop(img,xt,yt,xb,yb,ratio):
     return frame
 
 def cropAndRotate(img,xt,yt,xb,yb,ratio,xl,yl,xr,yr):
-
+    """
+    Crops an image according to the box around the face and then turns it to align the eyes, and is scaled by a certain ratio
+    :param img: image to be cropped
+    :param xt, yt: coordinates of the top-left corner of the box
+    :param xb, yb: coordinates of the bottom-right corner
+    :param xl, yl: coordinates of the left eye
+    :param xr, yr: coordinates o the right eye
+    :param ratio: 
+    :return: turned and cropped image as an array
+    """
     theta = rotateEyes(img,xl,yl,xr,yr)
 
     img2 = crop(img,xt,yt,xb,yb,ratio*1.5)
@@ -74,18 +91,18 @@ def cropAndRotate(img,xt,yt,xb,yb,ratio,xl,yl,xr,yr):
     # plt.show()
 
     # Use in order to crop the image too big, and then rotate it, and then crop it again to get rid of all the black borders
-    xtT = 0
-    ytT = 0
-    xbT = turned.shape[1]
-    ybT = turned.shape[0]
+    # xtT = 0
+    # ytT = 0
+    # xbT = turned.shape[1]
+    # ybT = turned.shape[0]
 
-    originalW = xb-xt
-    originalH = yb-yt
+    # originalW = xb-xt
+    # originalH = yb-yt
 
-    offSetX = (xbT - originalW)//4
-    offSetY = (ybT - originalH)//4
+    # offSetX = (xbT - originalW)//4
+    # offSetY = (ybT - originalH)//4
 
-    imgFinal = turned[(xtT + offSetX) : (xbT - offSetX), (ytT + offSetY) : (ybT - offSetY)]
+    # imgFinal = turned[(xtT + offSetX) : (xbT - offSetX), (ytT + offSetY) : (ybT - offSetY)]
 
     #imgFinal = crop(turned,xt,yt,xb,yb,ratio)
     # plt.imshow(imgFinal, interpolation='nearest')
@@ -94,7 +111,12 @@ def cropAndRotate(img,xt,yt,xb,yb,ratio,xl,yl,xr,yr):
     return turned
 
 def rotateEyes(img,xl,yl,xr,yr):
-    #Rotation counterclockwise
+    """
+    Calculates the angle between the eyes and the horizontal line, rotation counterclockwise
+    :param xl, yl: coordinates of the left eye
+    :param xr, yr: coordinates o the right eye  
+    :return: angle in degrees
+    """
 
     deltaX = xl-xr
     deltaY = yl-yr
@@ -104,6 +126,14 @@ def rotateEyes(img,xl,yl,xr,yr):
     return theta
 
 def cropNormalizeAndRotate(img,xl,yl,xr,yr):
+    """
+    Crops an image according to the ISO/IEC 19794-5 norm and then turns it to align the eyes
+    :param img: image to be cropped
+    :param xl, yl: coordinates of the left eye
+    :param xr, yr: coordinates o the right eye
+    :param ratio: 
+    :return: turned and cropped image as an array
+    """
 
     distanceBetweenEyes = 60
     widthImage = 240
@@ -116,7 +146,7 @@ def cropNormalizeAndRotate(img,xl,yl,xr,yr):
 
     actualDistanceBetweenEyes = abs(xl-xr)
 
-    # ratio by which the image needs to be scaled to get the desired distance between eyes+
+    # ratio by which the image needs to be scaled to get the desired distance between eyes
     ratio = distanceBetweenEyes/actualDistanceBetweenEyes
 
     topLeftX = int(xl - (distanceBetweenleftBorderAndLeftEye)/ratio)
@@ -134,9 +164,9 @@ def cropNormalizeAndRotate(img,xl,yl,xr,yr):
     # bottomRightX and bottomRightY can't be over the image
 
     if bottomRightX > img.shape[1]:
-        bottomRightX = img.shape[1]
+        bottomRightX = img.shape[1] - 3
     if bottomRightY > img.shape[0]:
-        bottomRightY = img.shape[0]
+        bottomRightY = img.shape[0] - 3
 
     # Cropped image
     cropped = img[int(topLeftY) : int(bottomRightY), int(topLeftX) : int(bottomRightX)]
@@ -153,7 +183,6 @@ def cropNormalizeAndRotate(img,xl,yl,xr,yr):
 
     return turned
 
-
 def isPath(path):
     return os.path.isfile(path)
 
@@ -163,8 +192,8 @@ def isPath(path):
 def retinaface_extraction_1st_face(path = "src/img2.jpeg"):
     """
     Extracts the first detected face in an image
-    param path: path to the base image
-    return: b64 of the first face already cutted
+    :param path: path to the base image
+    :return: b64 of the first face already cut
     """
     img = imread(path)
     faces = RetinaFace.extract_faces(img_path = img, align = True)
@@ -185,14 +214,14 @@ def retinaface_extraction_1st_face(path = "src/img2.jpeg"):
     return base64Img.decode("ascii")
 
 # Detection of 1 face features in an image using DeepFace.analyze to get face coordinates and then crop the face, returns b64 image
-def deepface_analyze_single(path="", b64 = "", ratio = 1.6, rmbg = False):
+def deepface_analyze_single(path="", b64 = "", ratio = 1.3, rmbg = False):
     """
     Extracts the first detected face in an image
-    param path: path to the base image
-    param b4: b64 of the base image
-    param ratio: ratio between the face size and the image size
-    param rmbg: remove background or not
-    return: b64 of the first face already cutted
+    :param path: path to the base image
+    :param b4: b64 of the base image
+    :param ratio: ratio between the face size and the image size
+    :param rmbg: remove background or not
+    :return: b64 of the first face already cutted
     """
     # If both path and b64 are unchanged, return error
     if not path and not b64:
@@ -253,14 +282,14 @@ def deepface_analyze_single(path="", b64 = "", ratio = 1.6, rmbg = False):
     return base64Img.decode("ascii")
 
 # Detection of multiple faces features in an image using RetinaFace.detect_faces and then crop and rotate the faces, returns array b64 images
-def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = False, normalize = "true"):
+def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.3, rmbg = False, normalize = "true"):
     """
     Extracts all detected faces in the image
-    param path: path to the base image
-    param b4: b64 of the base image
-    param ratio: ratio between the face size and the image size
-    param rmbg: remove background or not
-    return: array of b64 of all processed faces
+    :param path: path to the base image
+    :param b4: b64 of the base image
+    :param ratio: ratio between the face size and the image size
+    :param rmbg: remove background or not
+    :return: array of b64 of all processed faces
     """
  
     #Return variable, contains all faces b64 datas
@@ -345,7 +374,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.6, rmbg = Fals
 
         return faces
 
-def retinaface_detect_faces_multiple_data_or_file(imgDataOrFile = "", ratio = 1.6):
+def retinaface_detect_faces_multiple_data_or_file(imgDataOrFile = "", ratio = 1.3):
 
     if isPath(imgDataOrFile):
         return retinaface_detect_faces_multiple(path=imgDataOrFile, ratio = ratio)
@@ -357,9 +386,9 @@ def retinaface_detect_faces_multiple_data_or_file(imgDataOrFile = "", ratio = 1.
 def detection_faces(path="", b64=""):
     """
     Extracts faces features in the image : eyes pos, mouth pos and face box
-    param path: path to the base image
-    param b4: b64 of the base image
-    return: dict of face features
+    :param path: path to the base image
+    :param b4: b64 of the base image
+    :return: dict of face features
     """
     if not path and not b64:
         # TODO: treat the error
