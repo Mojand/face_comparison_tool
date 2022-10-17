@@ -149,8 +149,12 @@ document
         });
     });
 
-//Convert an array buffer to a base64 string
+/**
+ * Convert an array buffer to a base64 string
+ * @param {Iterable} buffer Element to be converted to base64
+ */    
 function getB64Str(buffer) {
+
     var binary = "";
     var bytes = new Uint8Array(buffer);
     var len = bytes.byteLength;
@@ -160,8 +164,13 @@ function getB64Str(buffer) {
     return window.btoa(binary);
 }
 
-// Update thumbnail of the dropzone element when a new file is dropped
+/**
+ * Update thumbnail of the dropzone element when a new file is dropped
+ * @param {HTML Element} dropZoneElement Element where the element in dropped
+ * @param {File} file File being dropped 
+ */
 function updateThumbnail(dropZoneElement, file) {
+
     thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
 
     // First time - remove the prompt
@@ -175,10 +184,16 @@ function updateThumbnail(dropZoneElement, file) {
         thumbnailElement.classList.add("drop-zone__thumb");
         dropZoneElement.appendChild(thumbnailElement);
     }
+    // Display the name of the file
     thumbnailElement.dataset.label = file.name;
 }
 
-// Reset thumbnail of a dropzone after the file has been read
+/**
+ * Reset thumbnail of a dropzone after the file has been read
+ * @param {String} dropZoneElementId Id of the drop zone element
+ * @param {File} filesID Id of the element containing the files
+ *  
+ */ 
 function resetThumbnail(dropZoneElementId, filesID) {
     //Clear fileNameGUI element and reset the file content
     document.getElementById(filesID).value = null;
@@ -189,7 +204,7 @@ function resetThumbnail(dropZoneElementId, filesID) {
     thumbnailElement.classList.remove("drop-zone__thumb");
     // Removes the file name displayed
     thumbnailElement.innerHTML =
-        "<span class='drop-zone__prompt'>Drop file here or click to upload</span>";
+        "<span class='drop-zone__prompt'>"+ lang["Drop1"]+"</span>";
     thumbnailElement.dataset.label = "";
 }
 
@@ -202,12 +217,16 @@ for (var i = 0; i < radios.length; i++) {
         $("#formComparison").toggleClass("display-none display-inline");
         $(".setClass").toggleClass("display-none display-flex");
         $(".setClass2").toggleClass("display-none display-flex");
+        $("#divTable2Id").toggleClass("display-none display-flex");
         $(".setShowcaseClass").toggleClass("display-none display-inline");
         $("#responseDisplay3").toggleClass("display-none display-flex");
     };
 }
 
-// Reading files and responding to the server, for the file Modification functionality only
+/**
+ * Reading files and responding to the server, for the file Modification functionality only
+ * Exctracts all inputs : files, zoom, normalizeImage, creates a FormData object and sends it to the server
+ */
 function readBlob() {
     let file = null;
     let filetype = "";
@@ -299,7 +318,10 @@ function readBlob() {
     reader.readAsArrayBuffer(blob);
 }
 
-// Reading files and responding to the server for the file comparison case
+/**
+ * Reading files and responding to the server, for the file Comparison functionality only
+ * Exctracts all inputs : files, and creates a FormData object and sends it to the server
+ */
 function readBlob2() {
     let file = null;
     let filetype = "";
@@ -369,6 +391,8 @@ function readBlob2() {
     resetThumbnail("Comparison_dz1", "fileNameGUIComp1");
     resetThumbnail("Comparison_dz2", "fileNameGUIComp2");
 
+    var processChecked = document.getElementById("checkboxProcess").checked
+
     //Object aimed to read files
     var reader = new FileReader();
     var reader2 = new FileReader();
@@ -410,19 +434,29 @@ function readBlob2() {
                 imageTotalComp2 = base64String2;
             });
 
-            let xhr = new XMLHttpRequest();
-            xhr.onload = function (data) {
-                // data is the response from the server, it refers to Timeline
-                document.getElementById("loaderImg_ner").style.display = "none";
-                treatReturn2(data);
-            };
-            xhr.onerror = function (response) {
-                document.getElementById("loaderImg_ner").style.display = "none";
-                console.log(response.responseText);
-            };
+            if (processChecked){
+                let xhr = new XMLHttpRequest();
+                xhr.onload = function (data) {
+                    // data is the response from the server, it refers to Timeline
+                    document.getElementById("loaderImg_ner").style.display = "none";
+                    treatReturn2(data);
+                };
+                xhr.onerror = function (response) {
+                    document.getElementById("loaderImg_ner").style.display = "none";
+                    console.log(response.responseText);
+                };
 
-            xhr.open("POST", "/face_extraction");
-            xhr.send(formData);
+                xhr.open("POST", "/face_extraction");
+                xhr.send(formData);
+
+            }
+            else{
+                var response = new Object();
+                response.features1 = [base64String]
+                response.features2 = [base64String2]
+                var jsonString = JSON.stringify(response)
+                treatReturn2(jsonString)
+            }
         }
     };
     reader2.readAsArrayBuffer(blob2);
@@ -463,7 +497,7 @@ window.addEventListener("DOMContentLoaded", function () {
         $("#formComparison").addClass("display-none");
     }
 
-    if (document.getElementById("radio2").checked) {
+    if (document.getElementById("radio2").checked) { //TODO else if
         $("#formModification").removeClass("display-none display-inline");
         $("#formModification").addClass("display-none");
 
@@ -472,6 +506,10 @@ window.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+/**
+ * Displays an image modification interface for a cropped face. Can change brightness, sharpenss, saturation, contrast and exposition
+ * @param {base64 image data} img Image to be modified 
+ */
 function imageModification(img) {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Result elements set up
@@ -493,8 +531,33 @@ function imageModification(img) {
     };
     btnDelete.innerHTML = "✕";
     btnDelete.style.top = "-160px";
-    //btnDelete.style.left ="98%";
     set.appendChild(btnDelete);
+
+    let btnShow = document.createElement("button")
+    btnShow.id = "btnShow" + numberImgs;
+    btnShow.className = "btnShowClass"
+    btnShow.classList.add("btnUi");
+    btnShow.classList.add("squareBtnClass");
+
+    btnShow.innerHTML = "✕";
+    btnShow.style.top = "-136px";
+    btnShow.style.left ="-19px";
+    btnShow.style.position = "relative"
+    btnShow.innerHTML = "▶";
+    set.appendChild(btnShow)
+
+    let btnDownload = document.createElement("button")
+    btnDownload.id = "btnDownload" + numberImgs;
+    btnDownload.className = "btnShowClass"
+    btnDownload.classList.add("btnUi");
+    btnDownload.classList.add("squareBtnClass");
+
+    btnDownload.innerHTML = "✕";
+    btnDownload.style.top = "-112px";
+    btnDownload.style.left ="-43px";
+    btnDownload.style.position = "relative"
+    btnDownload.innerHTML = "⤓";
+    set.appendChild(btnDownload)
 
     //Containing the image
     let right = document.createElement("div");
@@ -502,13 +565,28 @@ function imageModification(img) {
     let left = document.createElement("div");
 
     right.className = "right-div";
+    right.id = "rigth-div" + numberImgs
     left.className = "left-div";
+    left.id = "left-div" + numberImgs
 
     set.appendChild(left);
     set.appendChild(right);
 
     set.className = "setClass";
     set.classList.add("display-flex");
+
+    $(left).slideToggle(0);
+
+    $(btnShow).click(function () {
+        $("#left-div" + numberImgs).slideToggle(0);
+        if ("▶" == btnShow.innerHTML) {
+            btnShow.innerHTML = "◀";
+        } else {
+            btnShow.innerHTML = "▶";
+        }
+    });
+    
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     //Canvas setting up
@@ -523,7 +601,7 @@ function imageModification(img) {
     image_.crossOrigin = "";
     image_.src = "data:image/jpg;base64, " + img;
     image_.id = "image_canvas" + numberImgs;
-    image_.setAttribute("data-zoom-src", image_.src);
+    // image_.setAttribute("data-zoom-src", image_.src);
 
     //Drawing of the canvas content
     image_.onload = function () {
@@ -553,32 +631,6 @@ function imageModification(img) {
     left.appendChild(labelContr);
     left.appendChild(valContrDisplay);
     left.appendChild(rangeContr);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
-//Button (+/-) version of the contrast slider
-  let btnContrPlus = document.createElement("button")
-  let btnContrMoins = document.createElement("button")
-  btnContrPlus.id = "btnContrPlus" + numberImgs;
-  btnContrMoins.id = "btnContrMoins" + numberImgs;
-  btnContrPlus.innerText =" Contrast + "
-  btnContrMoins.innerText = " Contrast - "
-
-  btnContrMoins.onclick = function(){
-    Caman("#canvasId" + numberImgs, image_, function() {
-      this.contrast(5).render();
-    });
-  }
-  
-  btnContrPlus.onclick = function(){
-    Caman("#canvasId" + numberImgs, image_, function() {
-      this.contrast(-5).render();
-    });
-  }
-
-  left.appendChild(btnContrMoins)
-  left.appendChild(btnContrPlus)
-*/
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Brightness slider set up
@@ -698,12 +750,13 @@ function imageModification(img) {
         );
     }
     saveBtn.addEventListener("click", save);
+    btnDownload.addEventListener("click", save);
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Reset modification button set up
 
     // Rewrite the whole right.images array and start it from scratch
-    right.images = [["data:image/jpg;base64, " + img, 0, 0, 0, 0, 0]];
+    right.images = [["data:image/jpg;base64, " + img, 0, 0, 0, 0, 0]]; // BUG
     let currentUndoPosition = 0;
 
     let resetBtn = document.createElement("button");
@@ -958,9 +1011,6 @@ function imageModification(img) {
 
     displayField.append(set);
 
-    // var panzoom = Panzoom(canvas,{});
-    // right.addEventListener('wheel', panzoom.zoomWithWheel)
-
     document.querySelectorAll('input[type="range"]')[numberImgs * 5].onchange =
         filter;
     document.querySelectorAll('input[type="range"]')[
@@ -979,7 +1029,11 @@ function imageModification(img) {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
-// Version not using canvas, dragging the lens on the image : NOT USED
+/**
+ * Version not using canvas, dragging the lens on the image : UNUSED
+ * @param {base64 image data} img1 First image to be compared
+ * @param {base64 image data} img2 Second image to be compared
+ */
 function imageComparison(img1, img2) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Result elements set up
@@ -1094,17 +1148,20 @@ function imageComparison(img1, img2) {
     });
 }
 
-// Version using canvas, dragging directly the result image : USED
+/**
+ * Version using canvas, dragging directly the result image : USED
+ * @param {base64 image data} img1 First image to be compared
+ * @param {base64 image data} img2 Second image to be compared
+ */
 function imageComparisonCanvas(img1, img2) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Result elements set up
-
+    
+    //Remove the previous image comparison interface if the is one
     if (document.getElementById("setId2") != null) {
         document.getElementById("setId2").remove();
     }
 
     //Containing both images
-
     let set = document.createElement("div");
     set.className = "setClass2";
     set.id = "setId2";
@@ -1121,12 +1178,13 @@ function imageComparisonCanvas(img1, img2) {
     var h = window.outerHeight;
     var w = window.outerWidth;
 
+    // Table containing both draggable results in the first row, both images with lens on the second rowand both benches in the last row
     var table = document.createElement("table");
     table.id = "tableId";
     table.className = "tableComp ";
     table.style.width = "100%";
 
-    // First row : containing result and pannable images
+    // First row : containing result and draggable images
     row = table.insertRow(0);
 
     cel = row.insertCell(0);
@@ -1140,6 +1198,7 @@ function imageComparisonCanvas(img1, img2) {
 
     cel.classList.add("firstRowTableImage");
 
+    // Empty cell for spacing
     cel2 = row.insertCell(1);
     cel2.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;";
 
@@ -1157,6 +1216,7 @@ function imageComparisonCanvas(img1, img2) {
     // Second row : whole images with lens
     row = table.insertRow(1);
 
+    // Base images with lens
     cel = row.insertCell(0);
     cel.style.height = h / 3 - 15 + "px";
     cel.style.width = "50%";
@@ -1169,6 +1229,7 @@ function imageComparisonCanvas(img1, img2) {
     myimage1.classList.add("secondRowTableImage");
     cel.appendChild(myresultdiv1);
     myresultdiv1.appendChild(myimage1);
+    // Grid button right under the image
     let gridBtn = document.createElement("button")
     gridBtn.innerHTML = "Grid"
     gridBtn.id = "gridBtnId"
@@ -1242,8 +1303,7 @@ function imageComparisonCanvas(img1, img2) {
         );
     });
 
-    // Table with : feature, positive,negative, comment
-
+    // Table with : number, feature, positive, negative, comment and screenshot
     let divTable2 = document.createElement("div");
     divTable2.className = "tableComp2";
     divTable2.id = "divTable2Id";
@@ -1275,12 +1335,15 @@ function imageComparisonCanvas(img1, img2) {
     divTable2.appendChild(table2);
     displayField3.appendChild(divTable2);
 
+    // Reset all numbers of feature
+    resetNumberFeature()
     // Add a line to the feature table with the chosen feature name
     addLineInTable(table2, "Nose");
     addLineInTable(table2, "Eyes");
     addLineInTable(table2, "Mouth");
     addLineInTable(table2, "Cheek");
     addLineInTable(table2, "Eyebrow");
+
 
     // Set up the drag and drop feature visual cue on result canvas
     setUpDropOnFaceCanvas();
@@ -1384,10 +1447,97 @@ function imageComparisonCanvas(img1, img2) {
     downloadBtn.onclick = tableToCsv;
 
     // Various type of markers
+    var divTypes = document.createElement("div")
+    var shapeCircle = document.createElement("button")
+    shapeCircle.innerText = "○"
+    shapeCircle.id = "shapeCircleId"
+    shapeCircle.className = "shapeBtn"
+
+    var shapeSquare = document.createElement("button")
+    shapeSquare.innerText = "□"
+    shapeSquare.id = "shapeSquareId"
+    shapeSquare.className = "shapeBtn"
+
+    var shapeTriangle = document.createElement("button")
+    shapeTriangle.innerText ="△"
+    shapeTriangle.id = "shapeTriangleId"
+    shapeTriangle.className = "shapeBtn"
+
+    var shapeArrow = document.createElement("button")
+    shapeArrow.innerText = "↑"
+    shapeArrow.id = "shapeArrowId"
+    shapeArrow.className = "shapeBtn"
+
+    divTypes.appendChild(shapeCircle)
+    divTypes.appendChild(shapeSquare)
+    divTypes.appendChild(shapeTriangle)
+    divTypes.appendChild(shapeArrow)
+
+    divAddFeatureInput.appendChild(divTypes)
+    setUpShapes()
+
+    // Various colors
+    var divColor = document.createElement("div")
+    var colorRed = document.createElement('button')
+    colorRed.id = "colorRedId"
+    // colorRed.innerText = "Red"
+    colorRed.className = "colorBtn"
+    colorRed.classList.add("colorRed")
+
+    var colorBlue = document.createElement('button')
+    colorBlue.id = "colorBlueId"
+    // colorBlue.innerText = "Blue" 
+    colorBlue.className = "colorBtn"
+    colorBlue.classList.add("colorBlue")
+
+    var colorGreen = document.createElement('button')
+    colorGreen.id = "colorGreenId"
+    // colorGreen.innerText = "Green"
+    colorGreen.className = "colorBtn"
+    colorGreen.classList.add("colorGreen")
+
+    var colorWhite = document.createElement('button')
+    colorWhite.id = "colorWhiteId"
+    // colorWhite.innerText = "White"
+    colorWhite.className = "colorBtn"
+    colorWhite.classList.add("colorWhite")
+
+    var colorBlack = document.createElement('button')
+    colorBlack.id = "colorBlackId"
+    // colorBlack.innerText = "Black"
+    colorBlack.className = "colorBtn"
+    colorBlack.classList.add("colorBlack")
+
+    divColor.appendChild(colorRed)
+    divColor.appendChild(colorBlue)
+    divColor.appendChild(colorGreen)
+    divColor.appendChild(colorWhite)
+    divColor.appendChild(colorBlack)
+
+    divAddFeatureInput.appendChild(divColor)
+    setUpColors()
+
+    //Various scale
+    var scaleDiv = document.createElement('div')
+    var scaleInput = document.createElement('input')
+    scaleInput.type = "range"
+    scaleInput.value = "1"
+    scaleInput.id = 'scaleId'
+    scaleInput.style.width = '120px'
+    scaleInput.min = 0.1
+    scaleInput.max = 10
+    scaleInput.step = 0.1
+    scaleInput.value = 1
+
+    scaleDiv.appendChild(scaleInput)
+    divAddFeatureInput.appendChild(scaleDiv)
 
 }
 
-// Treat the server response for the MODIFICATION mode
+/**
+ * Treat the server response for the MODIFICATION mode
+ * @param {Response} response Response from the server
+ */
 function treatReturn(response) {
     repStr = response.target.response;
 
@@ -1419,15 +1569,13 @@ function treatReturn(response) {
             let canvas1 = document.createElement("canvas");
             canvas1.id = "canvasModif";
 
-            var ctx1 = canvas1.getContext("2d");
-
             imageModif.onload = function () {
                 canvas1.width = imageModif.width;
                 canvas1.height = imageModif.height;
 
                 set.appendChild(canvas1);
 
-                // Fabric image necessary for the fabric sqaure to be used
+                // Fabric image necessary for the fabric square to be used
                 const imgInstance = new fabric.Image(imageModif, {
                     left: 0,
                     top: 0,
@@ -1528,199 +1676,340 @@ function treatReturn(response) {
 
 }
 
+/**
+ * Treat the server response for the COMPARISON mode
+ * @param {Response} response Response from the server
+ */
 function treatReturn2(response) {
     /*
-  Treat the response of the server.
-  The server sends us all the faces detected in both images with thier respective features in a JSON object.
-  We then display the faces in the images and let the user chose the ones used.
-  */
+    Treat the response of the server.
+    The server sends us all the faces detected in both images with thier respective features in a JSON object.
+    We then display the faces in the images and let the user chose the ones used.
+    */
 
-    imgStr = response.target.response;
+    var processChecked = document.getElementById("checkboxProcess").checked
 
-    // Format the JSON object
-    // allFacesDetected :
-    // [ [base64Image, Dict{['facial_area'][x1,y1,x2,y2],['landmarks']['left_eye'] }] , ...]
+    if (!processChecked){
+        while (displayField3.firstChild) {
+            displayField3.removeChild(displayField3.firstChild);
+        }
 
-    while (displayField3.firstChild) {
-        displayField3.removeChild(displayField3.firstChild);
+
+        var chosen1 = JSON.parse(response).features1[0];
+        var chosen2 = JSON.parse(response).features2[0];
+
+        
+        function draw() {
+            
+            imageComparisonCanvas(chosen1, chosen2)
+            document.getElementById("loaderImg_ner").style.display = "none";
+        }
+        setTimeout(draw, 200);
+
     }
+    else{
 
-    allFacesDetected1 = JSON.parse(imgStr).features1;
-    allFacesDetected2 = JSON.parse(imgStr).features2;
+        imgStr = response.target.response;
 
-    var chosen1 = null;
-    var chosen2 = null;
+        // Format the JSON object
+        // allFacesDetected :
+        // [ [base64Image, Dict{['facial_area'][x1,y1,x2,y2],['landmarks']['left_eye'] }] , ...]
 
-    // The image is sent without coordinates, no face detected
-    if (
-        (allFacesDetected1.length == 1) &
-        (typeof allFacesDetected1[0] == "string")
-    ) {
-        chosen1 = allFacesDetected1[0];
-    }
-    if (
-        (allFacesDetected2.length == 1) &
-        (typeof allFacesDetected2[0] == "string")
-    ) {
-        chosen2 = allFacesDetected2[0];
-    }
+        while (displayField3.firstChild) {
+            displayField3.removeChild(displayField3.firstChild);
+        }
 
-    // If there is only one face detected
-    if (
-        (allFacesDetected1.length == 1) &
-        (typeof allFacesDetected1[0] == "object")
-    ) {
-        chosen1 = allFacesDetected1[0][0];
-    }
-    if (
-        (allFacesDetected2.length == 1) &
-        (typeof allFacesDetected2[0] == "object")
-    ) {
-        chosen2 = allFacesDetected2[0][0];
-    }
+        allFacesDetected1 = JSON.parse(imgStr).features1;
+        allFacesDetected2 = JSON.parse(imgStr).features2;
 
-    if ((chosen1 != null) & (chosen2 != null)) {
-        imageComparisonCanvas(chosen1, chosen2);
-    }
+        var chosen1 = null;
+        var chosen2 = null;
 
-    // Show the image in a canvas and draw square around the faces
+        // The image is sent without coordinates, no face detected
+        if (
+            (allFacesDetected1.length == 1) &
+            (typeof allFacesDetected1[0] == "string")
+        ) {
+            chosen1 = allFacesDetected1[0];
+        }
+        if (
+            (allFacesDetected2.length == 1) &
+            (typeof allFacesDetected2[0] == "string")
+        ) {
+            chosen2 = allFacesDetected2[0];
+        }
 
-    // If there are more than one face detected in the first image
-    if (allFacesDetected1.length != 1) {
-        const displayField2 = document.getElementById("responseDisplay");
+        // If there is only one face detected
+        if (
+            (allFacesDetected1.length == 1) &
+            (typeof allFacesDetected1[0] == "object")
+        ) {
+            chosen1 = allFacesDetected1[0][0];
+        }
+        if (
+            (allFacesDetected2.length == 1) &
+            (typeof allFacesDetected2[0] == "object")
+        ) {
+            chosen2 = allFacesDetected2[0][0];
+        }
 
-        let set = document.createElement("div");
-        set.className = "setShowcaseClass";
-        set.classList.add("display-inline");
+        if ((chosen1 != null) & (chosen2 != null)) {
+            imageComparisonCanvas(chosen1, chosen2);
+        }
 
-        const header = document.createElement("h1");
-        header.innerHTML = lang["Choose face"];
-        header.style.textAlign = "center";
-        set.appendChild(header);
-        displayField2.appendChild(set);
 
-        //create canvas for the imageTotalComp in the set
-        var imageComp1 = new Image();
-        imageComp1.src = "data:image/jpg;base64," + imageTotalComp1;
-        let canvas1 = document.createElement("canvas");
-        canvas1.id = "canvasComp1";
+        // Show the image in a canvas and draw square around the faces
 
-        var ctx1 = canvas1.getContext("2d");
+        // If there are more than one face detected in the first image
+        if (allFacesDetected1.length != 1) {
+            const displayField2 = document.getElementById("responseDisplay");
 
-        imageComp1.onload = function () {
-            canvas1.width = imageComp1.width;
-            canvas1.height = imageComp1.height;
-            ctx1.drawImage(
-                imageComp1,
-                0,
-                0,
-                imageComp1.width,
-                imageComp1.height
-            );
-            set.appendChild(canvas1);
+            let set = document.createElement("div");
+            set.className = "setShowcaseClass";
+            set.classList.add("display-inline");
 
-            // Draw rectangle around the faces detected in the first image
-            for (element of allFacesDetected1) {
-                let x1 = element[2][0];
-                let y1 = element[2][1];
-                let x2 = element[2][2];
-                let y2 = element[2][3];
-                let face = element[0];
+            const header = document.createElement("h1");
+            header.innerHTML = lang["Choose face"];
+            header.style.textAlign = "center";
+            set.appendChild(header);
+            displayField2.appendChild(set);
 
-                ctx1.strokeStyle = "yellow";
-                ctx1.strokeRect(x1, y1, x2 - x1, y2 - y1);
+            //create canvas for the imageTotalComp in the set
+            var imageComp1 = new Image();
+            imageComp1.src = "data:image/jpg;base64," + imageTotalComp1;
+            let canvas1 = document.createElement("canvas");
+            canvas1.id = "canvasComp1";
 
-                // If we click inside the rectangle
-                canvas1.addEventListener("click", function (e) {
-                    if (
-                        (e.offsetX >= x1) &
-                        (e.offsetX <= x2) &
-                        (e.offsetY >= y1) &
-                        (e.offsetY <= y2)
-                    ) {
+
+            imageComp1.onload = function () {
+                canvas1.width = imageComp1.width;
+                canvas1.height = imageComp1.height;
+
+                set.appendChild(canvas1);
+
+                // Fabric background image necessary for the fabric square to be used
+                const imgInstance = new fabric.Image(imageComp1, {
+                    left: 0,
+                    top: 0,
+                    width: imageComp1.width,
+                    height: imageComp1.height,
+                    hasControls: false,
+                    lockMovementX: true,
+                    lockMovementY: true,
+                    hoverCursor: "default",
+                    selectable: false,
+                });
+
+                // Square used by the user to select themselves an area
+                const canvasFabric = new fabric.CanvasEx("canvasComp1")
+                var rectSelect = new fabric.Rect({
+                    width: 100,
+                    height: 100,
+                    left: 10,
+                    top: 10,
+                    opacity: 0.5,
+                    lockRotation: true,
+                    cornerSize: 10,
+                    lockSkewingX: true,
+                    lockSkewingY: true,
+                });
+                rectSelect.on("object:dblclick", function (e) {
+
+                    let hidden_canvas = document.createElement("canvas");
+                    hidden_canvas.width = Math.floor(100 * rectSelect.zoomX);
+                    hidden_canvas.height = Math.floor(100 * rectSelect.zoomY);
+                    var hidden_ctx = hidden_canvas.getContext("2d");
+
+                    // Draw in a hidden canvas the desired zone
+                    hidden_ctx.drawImage(
+                        imageComp1,
+
+                        Math.floor(rectSelect.left),
+                        Math.floor(rectSelect.top),
+                        Math.floor(100 * rectSelect.zoomX),
+                        Math.floor(100 * rectSelect.zoomY),
+                        0,
+                        0,
+                        Math.floor(100 * rectSelect.zoomX),
+                        Math.floor(100 * rectSelect.zoomY)
+                    );
+
+                    displayField2.removeChild(set);
+                        chosen1 = hidden_canvas
+                        .toDataURL()
+                        .replace("data:image/png;base64,", "");
+                        if (chosen2 != null) {
+                            imageComparisonCanvas(chosen1, chosen2);
+                        }
+                });
+
+                canvasFabric.add(imgInstance, rectSelect);
+
+                //Draw all rectangles arount faces
+                for (element of allFacesDetected1){
+                    let x1 = element[2][0];
+                    let y1 = element[2][1];
+                    let x2 = element[2][2];
+                    let y2 = element[2][3];
+                    let face = element[0];
+
+                    const rect = new fabric.Rect({
+                        width: x2 - x1,
+                        height: y2 - y1,
+                        left: x1,
+                        top: y1,
+                        opacity: 0.3,
+                        hasControls: false,
+                        lockMovementX: true,
+                        lockMovementY: true,
+                        hoverCursor: "default",
+                        selectable: false,
+                        backgroundColor: "yellow",
+                    });
+
+                    rect.on("mousedown", function (e) {
+                        //If we click inside the rectangle
                         displayField2.removeChild(set);
                         chosen1 = face;
                         if (chosen2 != null) {
                             imageComparisonCanvas(chosen1, chosen2);
                         }
-                    }
-                });
+                    });
+
+                    canvasFabric.add(rect);
+                }
+            };
+        } else {
+            if (chosen1 == null) {
+                chosen1 = allFacesDetected1[0][0];
             }
-        };
-    } else {
-        if (chosen1 == null) {
-            chosen1 = allFacesDetected1[0][0];
         }
-    }
 
-    // If there are more than one face detected in the second image
-    if (allFacesDetected2.length != 1) {
-        const displayField2 = document.getElementById("responseDisplay");
-        let set = document.createElement("div");
-        set.className = "setShowcaseClass";
-        set.classList.add("display-inline");
+        // If there are more than one face detected in the second image
+        if (allFacesDetected2.length != 1) {
+            const displayField2 = document.getElementById("responseDisplay");
+            
+            let set2 = document.createElement("div");
+            set2.className = "setShowcaseClass";
+            set2.classList.add("display-inline");
 
-        const header = document.createElement("h1");
-        header.innerHTML = lang["Choose face"];
+            const header = document.createElement("h1");
+            header.innerHTML = lang["Choose face"];
+            header.style.textAlign = "center";
+            set2.appendChild(header);
+            displayField2.appendChild(set2);
 
-        header.style.textAlign = "center";
-        set.appendChild(header);
-        displayField2.appendChild(set);
+            //create canvas for the imageTotalComp in the set
+            var imageComp2 = new Image();
+            imageComp2.src = "data:image/jpg;base64," + imageTotalComp2;
+            let canvas2 = document.createElement("canvas");
+            canvas2.id = "canvasComp2";
 
-        //create canvas for the imageTotalComp in the set
-        var imageComp2 = new Image();
-        imageComp2.src = "data:image/jpg;base64," + imageTotalComp2;
-        let canvas2 = document.createElement("canvas");
-        canvas2.id = "canvasComp2";
+            imageComp2.onload = function () {
+                canvas2.width = imageComp2.width;
+                canvas2.height = imageComp2.height;
 
-        var ctx2 = canvas2.getContext("2d");
+                set2.appendChild(canvas2);
 
-        imageComp2.onload = function () {
-            canvas2.width = imageComp2.width;
-            canvas2.height = imageComp2.height;
+                // Fabric background image necessary for the fabric square to be used
+                const imgInstance2 = new fabric.Image(imageComp2, {
+                    left: 0,
+                    top: 0,
+                    width: imageComp2.width,
+                    height: imageComp2.height,
+                    hasControls: false,
+                    lockMovementX: true,
+                    lockMovementY: true,
+                    hoverCursor: "default",
+                    selectable: false,
+                });
 
-            ctx2.drawImage(
-                imageComp2,
-                0,
-                0,
-                imageComp2.width,
-                imageComp2.height
-            );
+                // Square used by the user to select themselves an area
+                const canvasFabric2 = new fabric.CanvasEx("canvasComp2")
+                var rectSelect2 = new fabric.Rect({
+                    width: 100,
+                    height: 100,
+                    left: 10,
+                    top: 10,
+                    opacity: 0.5,
+                    lockRotation: true,
+                    cornerSize: 10,
+                    lockSkewingX: true,
+                    lockSkewingY: true,
+                });
+                rectSelect2.on("object:dblclick", function (e) {
 
-            set.appendChild(canvas2);
+                    let hidden_canvas = document.createElement("canvas");
+                    hidden_canvas.width = Math.floor(100 * rectSelect2.zoomX);
+                    hidden_canvas.height = Math.floor(100 * rectSelect2.zoomY);
+                    let hidden_ctx = hidden_canvas.getContext("2d");
 
-            // Draw rectangle around the faces detected in the second image
-            for (element of allFacesDetected2) {
-                let x1 = element[2][0];
-                let y1 = element[2][1];
-                let x2 = element[2][2];
-                let y2 = element[2][3];
-                let face = element[0];
+                    // Draw in a hidden canvas the desired zone
+                    hidden_ctx.drawImage(
+                        imageComp2,
 
-                ctx2.strokeStyle = "yellow";
-                ctx2.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                        Math.floor(rectSelect2.left),
+                        Math.floor(rectSelect2.top),
+                        Math.floor(100 * rectSelect2.zoomX),
+                        Math.floor(100 * rectSelect2.zoomY),
+                        0,
+                        0,
+                        Math.floor(100 * rectSelect2.zoomX),
+                        Math.floor(100 * rectSelect2.zoomY)
+                    );
 
-                // If we click inside the rectangle
-                canvas2.addEventListener("click", function (e) {
-                    if (
-                        (e.offsetX >= x1) &
-                        (e.offsetX <= x2) &
-                        (e.offsetY >= y1) &
-                        (e.offsetY <= y2)
-                    ) {
-                        displayField2.removeChild(set);
+                    displayField2.removeChild(set2);
+                        chosen2 = hidden_canvas
+                        .toDataURL()
+                        .replace("data:image/png;base64,", "");
+                        if (chosen1 != null) {
+                            imageComparisonCanvas(chosen1, chosen2);
+                        }
+                });
+
+                canvasFabric2.add(imgInstance2, rectSelect2);
+
+                //Draw all rectangles arount faces
+                for (element of allFacesDetected2){
+                    let x1 = element[2][0];
+                    let y1 = element[2][1];
+                    let x2 = element[2][2];
+                    let y2 = element[2][3];
+                    let face = element[0];
+
+                    const rect2 = new fabric.Rect({
+                        width: x2 - x1,
+                        height: y2 - y1,
+                        left: x1,
+                        top: y1,
+                        opacity: 0.3,
+                        hasControls: false,
+                        lockMovementX: true,
+                        lockMovementY: true,
+                        hoverCursor: "default",
+                        selectable: false,
+                        backgroundColor: "yellow",
+                    });
+
+                    rect2.on("mousedown", function (e) {
+                        //If we click inside the rectangle
+                        displayField2.removeChild(set2);
                         chosen2 = face;
                         if (chosen1 != null) {
                             imageComparisonCanvas(chosen1, chosen2);
                         }
-                    }
-                });
+                    });
+
+                    canvasFabric2.add(rect2);
+                }
+            };
+
+        } else {
+            if (chosen2 == null) {
+                chosen2 = allFacesDetected2[0][0];
             }
-        };
-    } else {
-        if (chosen2 == null) {
-            chosen2 = allFacesDetected2[0][0];
         }
+
     }
 
 }

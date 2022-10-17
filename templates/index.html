@@ -4,10 +4,7 @@
         <meta charset="UTF-8" />
         <link rel="stylesheet" href="./static/styles/style.css" />
 
-        <link
-            rel="stylesheet"
-            src="./static/zoomist-main/dist/zoomist.min.css"
-        />
+        <link rel="stylesheet" src="./static/zoomist-main/dist/zoomist.min.css" />
 
         <title id="PageTitle">Face</title>
     </head>
@@ -19,31 +16,31 @@
                     <table>
                         <tr>
                             <td style="width: 5%">
-                                <a
-                                    href="https://www.gendarmerie.interieur.gouv.fr/"
-                                    ><img
-                                        src="./static/image/logoGNR.png"
-                                        width="100"
-                                        height="100"
+                                <a href="https://www.gendarmerie.interieur.gouv.fr/"
+                                    ><img src="./static/image/logoGNR.png" width="100" height="100"
                                 /></a>
                             </td>
                             <td style="width: 5%">
-                                <a
-                                    href="https://www.gendarmerie.interieur.gouv.fr/pjgn"
-                                    ><img
-                                        src="./static/image/logoPJGN.png"
-                                        width="100"
-                                        height="100"
+                                <a href="https://www.gendarmerie.interieur.gouv.fr/pjgn"
+                                    ><img src="./static/image/logoPJGN.png" width="100" height="100"
                                 /></a>
                             </td>
                             <td style="width: 80%">
-                                <h1
-                                    id="BannerTitle"
-                                    class="u-b-sm"
-                                    style="color: white"
-                                >
-                                    Face Extraction
-                                </h1>
+                                <h1 id="BannerTitle" class="u-b-sm" style="color: white">Face Extraction</h1>
+                            </td>
+                            <td style="width: 5%">
+                                <a href="https://www.gendarmerie.interieur.gouv.fr/pjgn/scrcgn/division-des-fichiers-df"
+                                    ><img
+                                        src="./static/image/logoDF.png"
+                                        width="100"
+                                        height="100"
+                                        style="visibility: hidden"
+                                /></a>
+                            </td>
+                            <td style="width: 5%">
+                                <a href="https://www.gendarmerie.interieur.gouv.fr/pjgn/scrcgn/division-des-fichiers-df"
+                                    ><img src="./static/image/logoDF.png" width="100" height="100"
+                                /></a>
                             </td>
                         </tr>
                     </table>
@@ -53,36 +50,17 @@
         <div id="credit-card">
             <!--img src="" id="baseImage"-->
             <header>
-                <span id="FormTitle" class="title"
-                    ><strong>Face Extraction</strong></span
-                >
+                <span id="FormTitle" class="title"><strong>Face Extraction</strong></span>
             </header>
 
             <section id="content">
                 <div class="title">
-                    <strong style="color: #000000" id="SelectFunctionality"
-                        >Select the type of functionality</strong
-                    >
+                    <strong style="color: #000000" id="SelectFunctionality">Select the type of functionality</strong>
                 </div>
-                <input
-                    type="radio"
-                    id="radio1"
-                    name="radios"
-                    value="radioModification"
-                    checked
-                />
-                <label for="radio1" id="ImageModification"
-                    >Image Modification</label
-                >
-                <input
-                    type="radio"
-                    id="radio2"
-                    name="radios"
-                    value="radioComparison"
-                />
-                <label for="radio2" id="ImageComparison"
-                    >Image Comparison</label
-                >
+                <input type="radio" id="radio1" name="radios" value="radioModification" checked />
+                <label for="radio1" id="ImageModification">Image Modification</label>
+                <input type="radio" id="radio2" name="radios" value="radioComparison" />
+                <label for="radio2" id="ImageComparison">Image Comparison</label>
 
                 <br />
 
@@ -98,9 +76,7 @@
                         <div class="row name">
                             <div class="label" id="File">File:</div>
                             <div class="drop-zone" id="Modification_dz1">
-                                <span class="drop-zone__prompt" id="Drop1"
-                                    >Drop file here or click to upload</span
-                                >
+                                <span class="drop-zone__prompt" id="Drop1">Drop file here or click to upload</span>
                                 <input
                                     type="file"
                                     id="fileNameGUIModif"
@@ -115,19 +91,10 @@
                         <div class="row">
                             <div class="label" id="Path1">Absolute path:</div>
                             <div class="input size50">
-                                <input
-                                    type="text"
-                                    autocomplete="off"
-                                    name="url"
-                                    id="url"
-                                /><br />
+                                <input type="text" autocomplete="off" name="url" id="url" /><br />
                             </div>
                         </div>
-                        <div
-                            class="row name"
-                            id="deepface_options"
-                            style="display: table-row"
-                        >
+                        <div class="row name" id="deepface_options" style="display: table-row">
                             <div class="label" id="Zoom1">Zoom on face:</div>
                             <div class="input size50">
                                 <input
@@ -142,14 +109,8 @@
                             </div>
                         </div>
 
-                        <div
-                            class="row name"
-                            id="deepface_options"
-                            style="display: table-row"
-                        >
-                            <div class="label" id="ChooseAmongAll">
-                                Choose among all faces:
-                            </div>
+                        <div class="row name" id="deepface_options" style="display: table-row">
+                            <div class="label" id="ChooseAmongAll">Choose among all faces:</div>
                             <div class="input size50check">
                                 <input
                                     checked
@@ -162,14 +123,8 @@
                                 <br />
                             </div>
                         </div>
-                        <div
-                            class="row name"
-                            id="deepface_options2"
-                            style="display: table-row"
-                        >
-                            <div class="label" id="NormalizeFormat">
-                                Normalize Format:
-                            </div>
+                        <div class="row name" id="deepface_options2" style="display: table-row">
+                            <div class="label" id="NormalizeFormat">Normalize Format:</div>
                             <div class="input size50check">
                                 <input
                                     checked
@@ -184,13 +139,7 @@
                         </div>
                     </div>
 
-                    <input
-                        type="button"
-                        style="float: right"
-                        value="Analyse"
-                        name="button_type"
-                        id="button_deepface"
-                    />
+                    <input type="button" style="float: right" value="Analyse" name="button_type" id="button_deepface" />
                 </form>
 
                 <form
@@ -205,9 +154,7 @@
                         <div class="row name">
                             <div class="label" id="File2">File:</div>
                             <div class="drop-zone" id="Comparison_dz1">
-                                <span class="drop-zone__prompt" id="Drop2"
-                                    >Drop file here or click to upload 1</span
-                                >
+                                <span class="drop-zone__prompt" id="Drop2">Drop file here or click to upload 1</span>
                                 <input
                                     type="file"
                                     id="fileNameGUIComp1"
@@ -223,9 +170,7 @@
                         <div class="row name">
                             <div class="label" id="File3">File:</div>
                             <div class="drop-zone" id="Comparison_dz2">
-                                <span class="drop-zone__prompt" id="Drop3"
-                                    >Drop file here or click to upload 2</span
-                                >
+                                <span class="drop-zone__prompt" id="Drop3">Drop file here or click to upload 2</span>
                                 <input
                                     type="file"
                                     id="fileNameGUIComp2"
@@ -240,33 +185,32 @@
                         <div class="row">
                             <div class="label" id="Path2">Absolute path 1:</div>
                             <div class="input size50">
-                                <input
-                                    type="text"
-                                    autocomplete="off"
-                                    name="url"
-                                    id="urlComp1"
-                                /><br />
+                                <input type="text" autocomplete="off" name="url" id="urlComp1" /><br />
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="label" id="Path3">Absolute path 2:</div>
                             <div class="input size50">
+                                <input type="text" autocomplete="off" name="url" id="urlComp2" /><br />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="label" id="checkProcess">Process images :</div>
+                            <div class="input size50check">
                                 <input
-                                    type="text"
                                     autocomplete="off"
                                     name="url"
-                                    id="urlComp2"
+                                    id="checkboxProcess"
+                                    type="checkbox"
+                                    checked
                                 /><br />
                             </div>
                         </div>
                     </div>
 
-                    <div
-                        class="row name"
-                        id="deepface_options"
-                        style="display: table-row"
-                    ></div>
+                    <div class="row name" id="deepface_options" style="display: table-row"></div>
                     <input
                         type="button"
                         style="float: right"
@@ -278,12 +222,7 @@
             </section>
         </div>
         <div align="center">
-            <div
-                class="loader"
-                id="loaderImg_ner"
-                align="center"
-                style="display: none"
-            ></div>
+            <div class="loader" id="loaderImg_ner" align="center" style="display: none"></div>
         </div>
 
         <div class="faceDisplayFullImage" id="responseDisplay"></div>
@@ -292,65 +231,41 @@
         <!--------------------------------- Libraries import ---------------------------------------->
 
         <!-- jQuery  -->
-        <script
-            type="text/javascript"
-            src="./static/jquery-3.6.0.min.js"
-        ></script>
+        <script type="text/javascript" src="./static/jquery-3.6.0.min.js"></script>
+
+        <!-- Long press  -->
+        <script type="text/javascript" src="./static/long-press-event.min.js"></script>
 
         <!-- Library used to manipulate a rectangle on top of an image, used to select  -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.js"></script>
+        <script type="text/javascript" src="./static/fabric.min.js"></script>
 
         <!-- Extension for fabric needed to use the "doubleclick" event -->
         <script src="./static/fabric.ext-master/fabricext/scripts/fabric.canvasex.js"></script>
 
         <!-- Library used to manipulate a canvas : contrast, staturation, etc... -->
-        <script
-            type="text/javascript"
-            src="./static/CamanJS-4.1.1/dist/caman.full.pack.js"
-        ></script>
-
-        <!-- Library used to zoom inside a canvas -->
-        <script src="https://unpkg.com/@panzoom/panzoom@4.4.4/dist/panzoom.min.js"></script>
+        <script type="text/javascript" src="./static/CamanJS-4.1.1/dist/caman.full.pack.js"></script>
 
         <!-- Library used to zoom inside a canvas -->
         <script src="./static/zoomist-main/dist/zoomist.js"></script>
 
         <!-- Library used to download the content of a canvas -->
-        <script
-            type="text/javascript"
-            src="./static/lentille/html2canvas.min.js"
-        ></script>
+        <script type="text/javascript" src="./static/lentille/html2canvas.min.js"></script>
 
         <!--------------------------------- Libraries import ---------------------------------------->
 
         <!-- Language file -->
         <script type="module" src="./static/lang.js"></script>
 
-        <!-- File containing the zoom + pan used in the Comparison functionality : NOT USED -->
-        <script
-            type="text/javascript"
-            src="./static/lentille/lentille.js"
-        ></script>
-
         <!-- File containing the zoom + pan used in the Comparison functionality but using canvas : USED -->
-        <script
-            type="text/javascript"
-            src="./static/lentille/canvas.js"
-        ></script>
+        <script type="text/javascript" src="./static/lentille/canvas.js"></script>
 
         <!-- File containing the feature table used in the Comparison functionality -->
-        <script
-            type="text/javascript"
-            src="./static/lentille/face_features_table.js"
-        ></script>
+        <script type="text/javascript" src="./static/lentille/face_features_table.js"></script>
 
         <!-- File containing the bench and image swaps used in the Comparison functionality -->
         <script type="text/javascript" src="./static/bench.js"></script>
 
         <!-- File containing the main interface -->
-        <script
-            type="text/javascript"
-            src="./static/video_analysis.js"
-        ></script>
+        <script type="text/javascript" src="./static/video_analysis.js"></script>
     </body>
 </html>

@@ -40,11 +40,11 @@ class STM(Resource):
 
             #Start timer
             start_time = time.time()
-
+            
             # Take the url parameter from the request.from attribute only if there is one
             url = None
             if "url" in request.form:
-                url = request.form["url"]
+                url = request.form["url"] # alternative : request.form.get("key")
                 if url == '':
                     url = None         
 
@@ -81,13 +81,13 @@ class STM(Resource):
 
             #If there is both an url and a file -> error
             if url is not None and file is not None:
-                return "pick url or file, not both", 500
+                return "pick url or file, not both", 500 #not 500 -> 400 "bad request"
 
             #If there is no file data but an url -> use the url to get the file data
             if file is None:
                 #If there is no file and an unvalid url -> error
                 if not os.path.exists(url):
-                    return "Non reachable path! -> " + url, 400
+                    return "Non reachable path! -> " + url, 400 #erreur à clarifier
                 
                 #Function call
                 """
@@ -111,6 +111,7 @@ class STM(Resource):
                 frame64 = detection_retina.retinaface_detect_faces_multiple(
                     b64=file,ratio=zoom, normalize=request.form["Normalize"]
                 )
+                #TODO redite, à faire en 1seul appel
 
 
             #Response in json format sending the base64 data of all detected faces
@@ -194,6 +195,8 @@ class STM(Resource):
                 :param imgDataOrFile: file data or url of the first picture
                 :return: dictionary with the facial key positions in the picture (facial area, eyes, nose, mouth)
                 """ 
+
+                #TODO tester différence entre detections de features 
 
                 if (len(face1) != 2) : feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face1)
                 else : feature = detection_retina.detection_faces_data_or_file(imgDataOrFile = face1[0])

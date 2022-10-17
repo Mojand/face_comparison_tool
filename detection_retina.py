@@ -305,7 +305,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.3, rmbg = Fals
         except Exception as e:
             return "invalid path ", e, 400
 
-    if not b64 == "":
+    if not b64 == "": #else ici
         try:
 
             #Named temporary file, will be deleted at the end of the with block
@@ -327,7 +327,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.3, rmbg = Fals
             return "invalid b64 ", e, 400
 
     # Convert the image because CV reads images as BGR and not RGB
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) #TODO tester rgb => rgb convertion
 
     # Get the coordinates of all faces (+ eyes, mouths...)
     data = RetinaFace.detect_faces(path)
@@ -356,7 +356,7 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.3, rmbg = Fals
                 imageFromArray = Image.fromarray(cropNormalizeAndRotate(img,xl,yl,xr,yr))
                 
             
-            if (norm == "false"):
+            if (norm == "false"): #else ici
 
                 imageFromArray = Image.fromarray(cropAndRotate(img,xt,yt,xb,yb,ratio,xl,yl,xr,yr))
                 
@@ -376,11 +376,15 @@ def retinaface_detect_faces_multiple(path="", b64 = "", ratio = 1.3, rmbg = Fals
 
 def retinaface_detect_faces_multiple_data_or_file(imgDataOrFile = "", ratio = 1.3):
 
+    returnValue=[]
+
     if isPath(imgDataOrFile):
-        return retinaface_detect_faces_multiple(path=imgDataOrFile, ratio = ratio)
+        returnValue = retinaface_detect_faces_multiple(path=imgDataOrFile, ratio = ratio)
 
     else:
-        return retinaface_detect_faces_multiple(b64=imgDataOrFile, ratio = ratio)
+        returnValue = retinaface_detect_faces_multiple(b64=imgDataOrFile, ratio = ratio)
+    
+    return returnValue
 
 # Returns the features of a single face in an image, eyes pos, mouth pos and face box using RetinaFace.detect_faces
 def detection_faces(path="", b64=""):
@@ -423,15 +427,11 @@ def detection_faces(path="", b64=""):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     # Get the coordinates of all faces (+ eyes, mouths...)
-    data = RetinaFace.detect_faces(path, threshold=0.75)
+    data = RetinaFace.detect_faces(path, threshold=0.90)
 
     if type(data) != dict:
 
-        data = RetinaFace.detect_faces(path, threshold=0.01)
-
-        if type(data) != dict:
-
-            return {'face_1' : {'score': 0}}
+        return {'face_1' : {'score': 0}}
 
     if exists(path): os.remove(path)
     return data

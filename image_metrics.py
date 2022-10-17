@@ -1,5 +1,6 @@
 #! python3
 import collections
+import json
 from itertools import chain
 import urllib.request as request
 import pickle 
@@ -21,6 +22,13 @@ from skimage import color, exposure, transform
 from skimage.exposure import equalize_hist
 import csv
 
+from datetime import datetime
+import glob, os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
+face_cascade = cv2.CascadeClassifier('/home/csd/Documents/Stage_PJGN/Test/Test_Deepface/src/haarcascade_frontalface_default.xml')
+
 
 # Generate a dictionary of all the metrics
 def metricsEvaluation(file):
@@ -28,17 +36,46 @@ def metricsEvaluation(file):
     #The dictionary is used to store the metrics and filled in each function
     metrics = {}
 
+    # print("&", end=' ')
     brightness, variance, rms = meanBrightness(file, metrics)
+    # print("%", end=' ')
     laplacian, variance, rms = laplacianOperatorOnImage(file, metrics)
+    # print("$", end=' ')
     mean, std, min, max, top = fourierTransformImage(file, metrics)
+    # print("@", end=' ')
     brisque = brisqueScore(file, metrics)
-    sharpness = AverageGradientMagnitude(file, metrics)
-    sumModulusDifference = SumModulusDifference(file, metrics)
-    tenengrad = tenengrad(file, metrics)
+
+    image = cv2.imread(file)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # print("+", end=' ')
+    alpha, beta, clip_hist_percent, maximum_gray = automatic_brightness_and_contrast(gray)
+    metrics['alpha_grey']=alpha
+    metrics['beta_grey']=beta
+    metrics['maximum_grey']=maximum_gray
+    metrics['clip_hist_percent_grey']=clip_hist_percent
+
+    # print("-", end=' ')
+    max_face_proportion, horizProp, vertProp= getFaceProportions(gray)
+    metrics['max_face_proportion']=max_face_proportion
+    metrics['horizontal_face_proportion']=horizProp
+    metrics['vertical_face_proportion']=vertProp
+    # print("#", end=' ')
+    metrics['faceQScore'] = faceQNET(file)
+    # print("?", end =' ')
+    with Image.open(file) as image:
+        metrics['height'] = image.height
+        metrics['width'] = image.width
+    # print("!", end = ' ')
+    metrics['xt'],metrics['yt'],metrics['xb'],metrics['yb'] = retinaFaceDetection(file)
 
     return metrics
 
 def brisqueScore(url, dict):
+    """
+    Calculates the BRISQUE score of an image
+    :param url: file name of the image
+    :param dict: dictionnary to b
+    """
     
     def normalize_kernel(kernel):
         return kernel / np.sum(kernel)
@@ -82,7 +119,7 @@ def brisqueScore(url, dict):
         dict["mscnMin"] = np.min((image - local_mean) / (local_var + C))
         dict["mscnMax"] = np.max((image - local_mean) / (local_var + C))
         dict["mscnMedian"] = np.median((image - local_mean) / (local_var + C))
-        dict["mscn"] = (image - local_mean) / (local_var + C)
+        #dict["mscn"] = (image - local_mean) / (local_var + C)
 
         return (image - local_mean) / (local_var + C)
         
@@ -95,7 +132,7 @@ def brisqueScore(url, dict):
         coefficient = alpha / (2 * beta * special.gamma(1 / alpha))
         dict["coefficient"] = coefficient
         # GGD density function ----------------------------------------------------------------------------------------------------
-        dict["ggd"] = coefficient * np.exp(-(np.abs(x) / beta) ** alpha)
+         #dict["ggd"] = coefficient * np.exp(-(np.abs(x) / beta) ** alpha)
         return coefficient * np.exp(-(np.abs(x) / beta) ** alpha)
 
 
@@ -211,10 +248,14 @@ def brisqueScore(url, dict):
     plt.rcParams["figure.figsize"] = 12, 9
 
 
-    image = skimage.io.imread(url, plugin='pil')
+    # image = skimage.io.imread(url, plugin='pil')
+    # cv2 "handles" the transparency of png images, the image is not good
+    # but at least the next line for the gray scale do not exploses
+    image = cv2.imread(url)
+
     gray_image = skimage.color.rgb2gray(image)
 
-    _ = skimage.io.imshow(image)
+    # _ = skimage.io.imshow(image)
 
 
     brisque_features = calculate_brisque_features(gray_image, kernel_size=7, sigma=7/6)
@@ -225,7 +266,7 @@ def brisqueScore(url, dict):
     brisque_features = np.concatenate((brisque_features, downscale_brisque_features))
 
     def scale_features(features):
-        with open('src/normalize.pickle', 'rb') as handle:
+        with open('/home/csd/Documents/Stage_PJGN/Test/Test_Deepface/src/normalize.pickle', 'rb') as handle:
             scale_params = pickle.load(handle)
         
         min_ = np.array(scale_params['min_'])
@@ -234,7 +275,7 @@ def brisqueScore(url, dict):
         return -1 + (2.0 / (max_ - min_) * (features - min_))
 
     def calculate_image_quality_score(brisque_features):
-        model = svmutil.svm_load_model('src/brisque_svm.txt')
+        model = svmutil.svm_load_model('/home/csd/Documents/Stage_PJGN/Test/Test_Deepface/src/brisque_svm.txt')
         scaled_brisque_features = scale_features(brisque_features)
 
         x, idx = svmutil.gen_svm_nodearray(
@@ -248,7 +289,7 @@ def brisqueScore(url, dict):
 
     # brisque score -----------------------------------------------------------------------------------------------------
     dict["brisque_score"] = calculate_image_quality_score(brisque_features)
-    return calculate_image_quality_score(brisque_features)
+    return dict["brisque_score"]
 
 def meanBrightness(file,dict):
 
@@ -300,41 +341,6 @@ def fourierTransformImage(file, dict):
 
     return np.mean(abs(dark_image_grey_fourier)), np.std(abs(dark_image_grey_fourier)) ,np.min(abs(dark_image_grey_fourier)), np.max(abs(dark_image_grey_fourier)), averageOfTop90PercentArray(abs(dark_image_grey_fourier))
 
-def AverageGradientMagnitude(file, dict):
-    im = Image.open(file).convert('L')
-    array = np.asarray(im, dtype=int)
-    gy,gx = np.gradient(array)
-    grad = np.sqrt(gx**2 + gy**2)
-    sharpnessAv = np.average(grad)
-    dict["meanGradientMagnitude"] = sharpnessAv
-    return sharpnessAv
-
-def tenengrad(file, dict):
-    
-    img = cv2.imread(file)
-    Ix = cv2.Sobel(img, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=3)
-    Iy = cv2.Sobel(img, ddepth=cv2.CV_64F, dx=0, dy=1, ksize=3)
-
-    S = Ix*Ix + Iy*Iy
-    tenengradMean = cv2.mean(S)[0]
-    if np.isnan(tenengradMean):
-        dict["tenengrad"] = np.nanmean(S)
-        return np.nanmean(S)
-
-    dict["tenengrad"] = tenengradMean
-    return tenengradMean
-
-def SumModulusDifference(file, dict):
-    sum = 0
-    im = Image.open(file).convert('L')
-    array = np.asarray(im, dtype=int)
-    for i in range(1, len(array)):
-        for j in range(1, len(array[0])):
-            sum += abs(array[i][j] - array[i][j-1]) + abs(array[i][j] - array[i+1][j])
-    
-    dict["sumModulusDifference"] = sum
-    return sum
-
 def blurImage(file):
     im = Image.open(file).convert('L')
     im = im.filter(ImageFilter.GaussianBlur(radius=5))
@@ -362,6 +368,238 @@ def dictTocsv(dict):
                 f.write(str(dict[key]) + ",") 
                 ct += 1
     print(ct)
-    
+
+def read_transparent_png(filename):
+    image_4channel = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
+    alpha_channel = image_4channel[:,:,3]
+    rgb_channels = image_4channel[:,:,:3]
+
+    # White Background Image
+    white_background_image = np.ones_like(rgb_channels, dtype=np.uint8) * 255
+
+    # Alpha factor
+    alpha_factor = alpha_channel[:,:,np.newaxis].astype(np.float32) / 255.0
+    alpha_factor = np.concatenate((alpha_factor,alpha_factor,alpha_factor), axis=2)
+
+    # Transparent Image Rendered on White Background
+    base = rgb_channels.astype(np.float32) * alpha_factor
+    white = white_background_image.astype(np.float32) * (1 - alpha_factor)
+    final_image = base + white
+    return final_image.astype(np.uint8)
+
+def getListOfFiles(folder):
+    """
+    Recursively gets all files in the given folder, and sub folders
+    :param folder: initial folder
+    :return: list of file name, and root folder
+    """
+    returnValue=[]
+    for root, dirs, files in os.walk(folder):
+        for file in files:
+            returnValue.append([os.path.join(root, file),root.split("/")[-1]])
+
+    return returnValue
+
+def automatic_brightness_and_contrast(gray, clip_hist_percent=1):
+    '''
+    Calculation of the patterns to automatically set brightness and contrast
+    of an image
+    :param imageFile:
+    :param dict:
+    :param clip_hist_percent:
+    :return:
+    '''
+
+    # Calculate grayscale histogram
+    hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
+    hist_size = len(hist)
+
+    # Calculate cumulative distribution from the histogram
+    accumulator = []
+    accumulator.append(float(hist[0]))
+    for index in range(1, hist_size):
+        accumulator.append(accumulator[index - 1] + float(hist[index]))
+
+    # Locate points to clip
+    maximum = accumulator[-1]
+    clip_hist_percent *= (maximum / 100.0)
+    clip_hist_percent /= 2.0
+
+    # Locate left cut
+    minimum_gray = 0
+    while accumulator[minimum_gray] < clip_hist_percent:
+        minimum_gray += 1
+
+    # Locate right cut
+    maximum_gray = hist_size - 1
+    while accumulator[maximum_gray] >= (maximum - clip_hist_percent):
+        maximum_gray -= 1
+
+    # Calculate alpha and beta values
+    alpha = 255 / (maximum_gray - minimum_gray)
+    beta = -minimum_gray * alpha
+
+    '''
+    # Calculate new histogram with desired range and show histogram 
+    new_hist = cv2.calcHist([gray],[0],None,[256],[minimum_gray,maximum_gray])
+    plt.plot(hist)
+    plt.plot(new_hist)
+    plt.xlim([0,256])
+    plt.show()
+    '''
+
+    # auto_result = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+    #return (auto_result, alpha, beta)
+    return alpha, beta, maximum, clip_hist_percent
+
+def getRelativePositionOfFace(imageDimensionSize,faceStart, faceLenght):
+    """
+    Gets the proportion of a given dimension
+    :param imageSize: lenght or width of the image, the same dimension of the other
+    two paramenterw
+    :param faceStart: starting poing in the face
+    :param faceLenght: lenght of the face for that given dimension
+    :return:
+    """
+    middleOfImage=imageDimensionSize/2
+
+    middleOfFace=faceStart+(faceLenght/2)
+
+    faceRelativePositionDifference=middleOfFace-middleOfImage
+
+    proportionFace = faceRelativePositionDifference * 100 / middleOfImage
+
+    return proportionFace
+
+def getFaceProportions(gray):
+    """
+    Returns the proportion of the biggest face, regarding the size of the image
+    :param gray: image to verify proportion, in shades of gray
+    :return: proportion of the bigest face, regarding the size of the image
+    """
+    proportion=0
+    horizontal = 0
+    vertical=0
+    if len(gray) > 1:
+        biggestFace = getBiggestFaceOnImage(gray)
+        if biggestFace:
+            # proportion calculation
+            v = gray.shape
+            imageSize = v[0] * v[1]
+            proportion = biggestFace[0] / imageSize
+
+            # Gets the relative position of the face regarding the center of the image
+            vertical = getRelativePositionOfFace(v[0],biggestFace[2], biggestFace[4])
+            horizontal = getRelativePositionOfFace(v[1],biggestFace[1], biggestFace[3])
+
+
+    return proportion, horizontal, vertical
+
+import random
+
+def getBiggestFaceOnImage(gray):
+    """
+    Returns the biggest zone of detected faces in the image
+    :param gray:
+    :return:
+    """
+    faces = face_cascade.detectMultiScale(gray, 1.05, 4)
+    biggest = 0
+    returnVector=[]
+    for (x, y, w, h) in faces:
+        area = w * y
+        if area > biggest:
+            biggest = area
+            returnVector=[biggest,x, y, w, h]
+    # if returnVector:
+    #     gray2 = cv2.rectangle(gray, (returnVector[1], returnVector[2]), (returnVector[1] + returnVector[3], returnVector[2] + returnVector[4]), (255, 0, 0), 2)
+    #     cv2.imwrite("test_"+str(random.random()*1000)+".jpg", gray2)
+    return returnVector
+
+def toCsv(object, fileName, delimiter=";"):
+    """
+    Saves the object into a csv file
+    :param object: The object to save, normally a list of dictionaries
+    :param fileName: name of the target CSV file
+    """
+
+    # get the name of the columns to use as header
+    columns=[]
+    if isinstance(object, list):
+        if len(object)>0 and isinstance(object[0], dict):
+            columns = object[0].keys()
+    elif  isinstance(object, dict):
+        columns = object.keys()
+
+    # saves the object ito a csv
+    with open(fileName, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, delimiter=delimiter, fieldnames=columns)
+        writer.writeheader()
+        writer.writerows(object)
+
+from keras.models import load_model
+
+def faceQNET(file):
+    """
+    Calculation of FaceQNet score
+    :param file: image filename to be assessed
+    """
+    batch_size = 1
+
+    img = cv2.resize(cv2.imread(file, cv2.IMREAD_COLOR), (224, 224))
+    imgArray = np.array([img], copy=False, dtype=np.float32)
+    model = load_model("/home/csd/Bureau/FaceQnet-master/src/FaceQnet_v1.h5")
+    score = model.predict(imgArray, batch_size=batch_size, verbose=0)
+
+    return score[0][0]
+
+from retinaface import RetinaFace
+
+def retinaFaceDetection(file):
+    """ 
+    Uses RetinaFace to detect the face in the image
+    :param file: filename of the image to be detected
+    :return: coordinates of the face according to RetinaFace
+    """ 
+    data = RetinaFace.detect_faces(file)
+    if type(data) != dict:
+        return 0,0,0,0
+
+    else:
+        for i, j in data.items():
+            xt,yt,xb,yb = j['facial_area'][0],j['facial_area'][1],j['facial_area'][2],j['facial_area'][3]
+            return xt,yt,xb,yb
+
+if __name__ == '__main__':
+    startTime = datetime.now()
+    imagesFolder="/home/csd/Documents/Stage_PJGN/Test/Test_Deepface/Database/photo_questions"
+    listOfMetrics=[]
+    listOfImages=getListOfFiles(imagesFolder)
+    # For each image fond, collects the metrics and add the name of the
+    # folder as the label of the image
+    for image in listOfImages:
+        print("Analysing: ", image[0])
+        metrics=metricsEvaluation(image[0])
+        metrics["fileName"]=image[0]
+        metrics["predict"]=image[1]
+        listOfMetrics.append(metrics)
+        #image = cv2.imread(image[0])
+
+    toCsv(listOfMetrics, "listOfMetricsImageQualityWithFaceQnetandRetinaFace.csv")
+    # saves the metrics
+    # with open("listOfMetricsImageQuality.json","w") as f:
+    #     json.dump(listOfMetrics,f)
+
+    endTime = datetime.now()
+    print("************************************")
+    print("Start: ", startTime)
+    print("End: ", endTime)
+    print("Time elapsed: ", (endTime - startTime))
+    print("************************************")
+
+
+#print(retinaFaceDetection("/home/csd/Documents/Stage_PJGN/Test/Test_Deepface/Database/photo_questions/beyonce_question_1.jpg"))
+#print(retinaFaceDetection("/home/csd/Images/Presentation.png"))
 #Generates a csv file with the metrics of the given URL
-dictTocsv(metricsEvaluation("src/img1.jpg"))
+# dictTocsv(metricsEvaluation("src/img1.jpg"))
+
